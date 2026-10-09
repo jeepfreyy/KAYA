@@ -1,0 +1,16 @@
+:root { font-family: "Segoe UI", system-ui, sans-serif; background: #f7f8f2; color: #183e35; }
+* { box-sizing: border-box; } body { margin: 0; } main { max-width: 800px; margin: auto; padding: 32px 24px 48px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; } a { color: #214e40; }
+header a { text-decoration: none; font-weight: 750; font-size: 20px; } header a span { font-size: 12px; font-weight: 400; }
+.pill { border: 1px solid #c9d4b9; padding: 7px 10px; border-radius: 18px; font-size: 10px; letter-spacing: 1px; }
+.hero { margin: 56px 0 24px; max-width: 580px; } .eyebrow { font-size: 11px; letter-spacing: 2px; font-weight: 700; }
+h1 { font-size: clamp(36px, 6vw, 54px); letter-spacing: -2px; line-height: 1.1; margin: 14px 0 22px; } p { line-height: 1.7; }
+aside { padding: 18px; background: #eaf0d5; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+form { background: white; border: 1px solid #d8dfd2; border-radius: 18px; margin-top: 24px; padding: 28px; }
+fieldset { margin: 0 0 28px; padding: 0; border: 0; } legend { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 7px; } label span { color: #687464; font-size: 11px; font-weight: 400; margin-left: 6px; }
+input, select, textarea, button { font: inherit; } input:not([type=checkbox]), select, textarea { width: 100%; border: 1px solid #bdc9bb; border-radius: 8px; padding: 12px; background: #fff; color: #183e35; margin-bottom: 18px; } textarea { resize: vertical; }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } .checkbox { display: flex; gap: 10px; align-items: center; line-height: 1.6; font-weight: 400; } input[type=checkbox] { width: 18px; height: 18px; accent-color: #214e40; }
+button { background: #214e40; color: #fff; border: 0; border-radius: 9px; padding: 14px 20px; cursor: pointer; } :focus-visible { outline: 3px solid #9a4c13; outline-offset: 3px; }
+#confirmation { margin-bottom: 0; } footer { font-size: 12px; margin-top: 24px; color: #62715e; }
+@media(max-width: 540px) { .columns { grid-template-columns: 1fr; gap: 0; } form { padding: 20px; } header a span { display: block; } }

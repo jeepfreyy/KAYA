@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kaya Mode</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="panel.js"></script>
+  </head>
+  <body>
+    <main class="assistant" id="assistant" aria-busy="false">
+      <header class="header">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">k.</span><span>Kaya Mode</span></div>
+        <span class="badge" id="mode-badge">LOCAL AI</span>
+      </header>
+
+      <section class="intro" aria-labelledby="intro-title">
+        <p class="eyebrow">A LITTLE CLARITY. A FIRST STEP.</p>
+        <h1 id="intro-title">A clearer page.<br>A simpler next step.</h1>
+        <p class="intro-copy">Understand what you’re reading, untangle a confusing paragraph, or get ready to fill in a form.</p>
+      </section>
+
+      <aside class="sample-notice" id="sample-notice">
+        <strong id="notice-title">On your computer. At your pace.</strong>
+        <p id="notice-copy">Visible page text goes to local Ollama only when you select Analyze. Text in input fields is excluded. Personal details already printed on the page may be included.</p>
+      </aside>
+
+      <form id="analyze-form">
+        <label class="field-label" for="scenario">What would you like to analyze?</label>
+        <select id="scenario" name="scenario" aria-describedby="sample-notice">
+          <option value="page">Explain this page</option>
+          <option value="selection">Explain selected text</option>
+          <option value="live">Help me with this form</option>
+          <option value="success">Sample: community workshop registration</option>
+          <option value="no-form">Demo error: no form found</option>
+          <option value="unavailable">Demo error: AI unavailable</option>
+        </select>
+        <button class="analyze-button" id="analyze-button" type="submit">
+          <span class="spinner" id="spinner" hidden aria-hidden="true"></span>
+          <span id="button-label">Analyze</span>
+          <span class="button-arrow" id="button-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="secondary-button" id="cancel-button" type="button" hidden>Cancel analysis</button>
+      </form>
+
+      <p class="status" id="status" role="status" aria-live="polite" aria-atomic="true">Open a website and select Analyze. Drag the side panel’s edge to resize it.</p>
+      <div class="utility-links">
+        <button id="check-ai" type="button">Check local AI</button>
+        <a href="setup.html" target="_blank">Setup guide</a>
+        <a href="http://localhost:4173" target="_blank">Practice page ↗</a>
+      </div>
+
+      <section class="error-card" id="error" role="alert" aria-atomic="true" hidden>
+        <h2 id="error-title"></h2>
+        <p id="error-message"></p>
+      </section>
+
+      <section class="results" id="results" aria-labelledby="results-title" hidden>
+        <div class="results-heading">
+          <h2 id="results-title" tabindex="-1">Your starting point</h2>
+          <span class="sample-label" id="result-source">LOCAL AI RESPONSE</span>
+        </div>
+        <p class="result-meta" id="result-meta"></p>
+        <section class="result-card" aria-labelledby="overview-title">
+          <p class="section-number" aria-hidden="true">01 / UNDERSTAND</p>
+          <h3 id="overview-title">Overview</h3>
+          <p id="overview"></p>
+        </section>
+        <section class="result-card" aria-labelledby="checklist-title">
+          <p class="section-number" aria-hidden="true">02 / GET READY</p>
+          <h3 id="checklist-title">Preparation checklist</h3>
+          <p class="checklist-hint" id="checklist-hint">Check things off as you get ready.</p>
+          <ul class="checklist" id="checklist"></ul>
+        </section>
+        <section class="result-card first-step" aria-labelledby="first-step-title">
+          <p class="section-number" aria-hidden="true">03 / BEGIN</p>
+          <h3 id="first-step-title">First step</h3>
+          <p id="first-step"></p>
+          <div id="next-step-source"></div>
+        </section>
+        <p class="results-footnote" id="results-footnote">Based on supported fields only. Check the actual form’s instructions; AI can make mistakes.</p>
+      </section>
+
+      <footer>One step at a time. <strong>Kaya mo ’to.</strong></footer>
+    </main>
+  </body>
+</html>

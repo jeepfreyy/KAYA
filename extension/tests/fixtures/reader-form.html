@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Fictional form reader test</title>
+<style>label { display: block; margin: 8px; } .not-visible { display: none; }</style>
+<h1>Community workshop test fixture</h1>
+<form>
+  <label for="name">Full name</label>
+  <input id="name" required placeholder="Enter your full name" value="PRIVATE_INITIAL_NAME">
+  <input type="email" aria-label="Email address" placeholder="name@example.test" value="PRIVATE_INITIAL_EMAIL">
+  <span id="session-label" hidden>Preferred session</span><span id="session-note">time</span>
+  <select aria-labelledby="session-label session-note" aria-required="true">
+    <option value="PRIVATE_OPTION_1">Choose a session</option>
+    <option value="PRIVATE_OPTION_2" label="Morning">Internal morning text</option>
+    <option value="PRIVATE_OPTION_3" selected>Afternoon</option>
+    <option hidden value="PRIVATE_OPTION_4">PRIVATE_HIDDEN_OPTION</option>
+  </select>
+  <label>Notes <textarea placeholder="Optional notes">PRIVATE_INITIAL_NOTES</textarea></label>
+  <label><input type="checkbox" checked value="PRIVATE_CHECKBOX">I agree to be contacted</label>
+  <label><input type="radio" name="attendance" value="PRIVATE_RADIO_1" required>In person</label>
+  <label><input type="radio" name="attendance" value="PRIVATE_RADIO_2">Online</label>
+  <input type="file" aria-label="Supporting document">
+  <input type="number" aria-labelledby="missing-label" placeholder="" value="97531">
+  <label>Accessible fallback <input aria-label="Overridden accessible label" readonly></label>
+  <input type="text" aria-labelledby="missing" aria-label="Fallback label" disabled>
+  <label>Preferences <span contenteditable="true">PRIVATE_EDITABLE</span><input type="text"></label>
+  <label>Password <input type="password" value="PRIVATE_PASSWORD"></label>
+  <input type="hidden" value="PRIVATE_HIDDEN">
+  <div hidden><input aria-label="PRIVATE_HIDDEN_ANCESTOR"></div>
+  <div class="not-visible"><input aria-label="PRIVATE_CSS_HIDDEN"></div>
+  <div style="visibility: hidden"><input aria-label="PRIVATE_INVISIBLE"></div>
+  <div style="opacity: 0"><input aria-label="PRIVATE_TRANSPARENT"></div>
+  <div aria-hidden="true"><input aria-label="PRIVATE_ARIA_HIDDEN"></div>
+  <div inert><input aria-label="PRIVATE_INERT"></div>
+  <input type="submit" value="PRIVATE_SUBMIT">
+  <input type="reset" value="PRIVATE_RESET">
+  <input type="button" value="PRIVATE_BUTTON">
+  <button>Submit</button>
+</form>
+<input type="date" aria-label="Preferred date">
+</html>

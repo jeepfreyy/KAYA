@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kaya Mode · Community workshop</title>
+  <link rel="stylesheet" href="demo.css"><script src="demo.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><a href="/">Kaya Mode <span>practice space</span></a><span class="pill">FICTIONAL DEMO</span></header>
+    <section class="hero"><p class="eyebrow">SMALL STEPS, TOGETHER</p><h1>A place to learn<br>something new.</h1>
+      <p>Register for a fictional community workshop. Open Kaya Mode to explain this page, simplify selected text, or prepare to fill in the form.</p></section>
+    <aside>This is a practice form. Use fictional details only. Nothing is uploaded, saved, or submitted.</aside>
+    <section class="hero" aria-labelledby="details-title">
+      <h2 id="details-title">Before you register</h2>
+      <p>The fictional workshop is free. Choose one topic and a morning or afternoon session. A name and contact email are required; a phone number is optional.</p>
+      <p id="selection-example">Registration is provisional until the organizer sends a confirmation email. Selecting a preferred session does not guarantee that a place is available.</p>
+      <p>Try it: highlight the paragraph above, then choose <strong>Explain selected text</strong> in Kaya Mode. To prepare for the form below, choose <strong>Help me with this form</strong>.</p>
+    </section>
+    <form id="workshop-form">
+      <fieldset><legend>01 · About you</legend>
+        <label for="full-name">Full name <span>Required</span></label>
+        <input id="full-name" name="fullName" autocomplete="off" placeholder="Enter your full name" required>
+        <div class="columns"><div><label for="email">Contact email <span>Required</span></label>
+          <input id="email" name="email" type="email" placeholder="you@example.test" autocomplete="off" required></div>
+          <div><label for="phone">Phone number <span>Optional</span></label><input id="phone" name="phone" type="tel" placeholder="A contact number" autocomplete="off"></div></div>
+      </fieldset>
+      <fieldset><legend>02 · Your workshop</legend>
+        <label for="workshop">Workshop topic <span>Required</span></label>
+        <select id="workshop" name="workshop" required><option value="">Choose a topic</option><option value="gardening">Home gardening</option><option value="digital">Everyday digital skills</option><option value="craft">Creative crafts</option></select>
+        <div class="columns"><div><label for="session">Preferred session <span>Required</span></label>
+          <select id="session" name="session" required><option value="">Choose a session</option><option value="morning">Morning · 9 AM to 11 AM</option><option value="afternoon">Afternoon · 1 PM to 3 PM</option></select></div>
+          <div><label for="guests">Number of additional guests <span>Optional</span></label><input id="guests" type="number" name="guests" min="0" max="3" placeholder="0 to 3"></div></div>
+        <label for="notes">Accessibility or learning needs <span>Optional</span></label>
+        <textarea id="notes" name="notes" rows="3" placeholder="Anything that would help you participate"></textarea>
+      </fieldset>
+      <fieldset><legend>03 · Keep in touch</legend>
+        <label class="checkbox"><input type="checkbox" name="updates">Send me updates about future workshops (optional)</label>
+      </fieldset>
+      <button type="submit">Finish practice registration</button>
+      <p id="confirmation" role="status" aria-live="polite"></p>
+    </form>
+    <footer>Built for the Kaya Mode demo. <a href="no-form.html">Try a page without a form</a>.</footer>
+  </main>
+</body></html>

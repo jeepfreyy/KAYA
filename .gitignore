@@ -1,0 +1,15 @@
+# Local secrets
+.env
+.env.*
+
+# Dependencies, downloaded runtime/models, and generated test packages
+node_modules/
+.kaya-runtime/
+test-results/
+
+# Local tools and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

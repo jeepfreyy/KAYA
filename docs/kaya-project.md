@@ -5,7 +5,7 @@
 Kaya helps people understand web content and prepare to complete forms with less
 confusion. The original hackathon PDF defines the form assistant. This rebuild
 keeps that complete flow and adds page explanations, selected-text explanations,
-and a persistent side panel based on the subsequent product discussion.
+a persistent side panel, and a reversible guided view over the website's original fields.
 
 ## Program coverage
 
@@ -14,6 +14,8 @@ and a persistent side panel based on the subsequent product discussion.
   and options, excluding entered values and passwords.
 - Local AI: Qwen 2.5 3B through Ollama, bounded prompts, structured JSON validation,
   timeout and connection handling, model name and timing.
+- Guided view: AI-generated plain labels, help text, and field order bound to the
+  extracted field indexes. It highlights and focuses original controls without moving them.
 - Delivery: fictional practice page/form, Windows/macOS instructions, automated
   privacy and integration checks, reproducible demonstration.
 
@@ -41,6 +43,7 @@ examples, explicitly labeled, and never used as a fallback for live failures.
 `panel.html` / `panel.js` / `styles.css` render the responsive side panel.
 `analysis-service.js` routes the selected mode and translates errors.
 `form-reader*` and `page-reader*` perform on-demand main-frame extraction.
+`guided-view*` applies and removes the field-by-field guide in the active page.
 `local-ai-client.js` uses a runtime port with cancellation and a request heartbeat.
 `background.js` validates the extension sender and permits one request at a time.
 `ollama.js` handles bounded input, streaming, timeouts, and form output validation.
@@ -48,6 +51,7 @@ examples, explicitly labeled, and never used as a fallback for live failures.
 
 Form input: `{fields: [{label, type, required, placeholder, options}]}`.
 Form output: `{overview, preparationChecklist, firstStep}`.
+Guided output adds `{fieldGuidance: [{fieldIndex, plainLabel, helpText}]}`.
 Page input: `{kind: "page" | "selection", blocks: [{id, text}]}`.
 Page output: `{summary, keyPoints: [{text, sourceId}], nextStep, nextStepSourceId}`.
 An empty nextStepSourceId means the text specifies no supported next action.
@@ -60,7 +64,8 @@ clear results and cancel requests so another page's answer is not shown as curre
 ## Boundaries
 
 - No cloud model, backend database, accounts, analytics, or stored result history.
-- No autofill, automatic clicking/submission, or rewriting the website's content.
+- No autofill or automatic submission. Guided view adds a removable overlay and
+  highlight; it does not replace, relocate, or rewrite the website's controls.
 - No PDFs, OCR, images, iframes, shadow DOM, or custom-widget interpretation.
 - Main page/selection text: at most 40 blocks, 700 characters per block, 6,000 total.
 - Form reader: 50 fields, 200 characters per string, 30 select options; the model

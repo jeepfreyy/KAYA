@@ -43,6 +43,10 @@ test('incomplete or malformed results are rejected before rendering', () => {
   }
   assert.equal(validateAnalysis(valid), valid);
   assert.equal(validateAnalysis({ ...valid, source: 'live' }).source, 'live');
+  const guided = { ...valid, source: 'live', kind: 'guided', fieldCount: 1,
+    fieldGuidance: [{ fieldIndex: 0, plainLabel: 'Your name', helpText: 'Enter the requested name.' }] };
+  assert.equal(validateAnalysis(guided), guided);
+  assert.throws(() => validateAnalysis({ ...guided, fieldGuidance: [] }), { code: 'INVALID_RESPONSE' });
 });
 
 test('errors provide recovery guidance without exposing raw exceptions', () => {

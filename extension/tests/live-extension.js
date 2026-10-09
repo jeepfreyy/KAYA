@@ -61,7 +61,7 @@ try {
   await panel.evaluate(() => document.querySelector('#check-ai').click());
   await panel.waitForFunction(() => !document.querySelector('#analyze-button').disabled, null, { timeout: 10000 });
   assert.match(await panel.locator('#status').textContent(), /available locally/);
-  // Exercise all three modes against the actual local model, not samples.
+  // Exercise all four modes against the actual local model, not samples.
   for (const mode of ['page', 'selection']) {
     if (mode === 'selection') await demo.evaluate(() => {
       const range = document.createRange();
@@ -110,6 +110,26 @@ try {
   await panel.screenshot({ path: fileURLToPath(new URL('test-results/kaya-live.png', project)), fullPage: true });
   await writeFile(new URL('test-results/live-result.txt', project), result);
   console.log('REAL LOCAL QWEN RESULT:\n' + result);
+  await focusDemo();
+  await panel.evaluate(() => {
+    const select = document.querySelector('#scenario'); select.value = 'guided'; select.dispatchEvent(new Event('change'));
+    document.querySelector('#analyze-button').click();
+  });
+  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error').hidden, null, { timeout: 125000 });
+  if (await panel.locator('#error').isVisible()) throw new Error(`guided: ${await panel.locator('#error').innerText()}`);
+  assert.equal(await panel.locator('#result-source').textContent(), 'LOCAL AI RESPONSE');
+  assert.equal(await demo.locator('#__kaya_mode_guided_view_v1__').count(), 1);
+  assert.equal(await demo.locator('form #full-name').count(), 1, 'Guided mode must retain the original form field');
+  assert.equal(await demo.locator('[data-kaya-mode-guided-active-v1]').count(), 1);
+  const guidedBody = await worker.evaluate(() => globalThis.__kayaTestBody);
+  assert.equal(JSON.parse(JSON.parse(guidedBody).messages[1].content).fields.length, 8);
+  assert.ok(!guidedBody.includes('PRIVATE_') && !guidedBody.includes('private-sentinel'));
+  await demo.screenshot({ path: fileURLToPath(new URL('test-results/kaya-guided-page.png', project)), fullPage: true });
+  await demo.locator('#__kaya_mode_guided_view_v1__').evaluate((element) => element.shadowRoot.querySelector('.exit').click());
+  assert.equal(await demo.locator('#__kaya_mode_guided_view_v1__').count(), 0);
+  await panel.evaluate(() => {
+    const select = document.querySelector('#scenario'); select.value = 'live'; select.dispatchEvent(new Event('change'));
+  });
   // Confirm cancellation remains available and stops a second real request.
   await focusDemo();
   await panel.evaluate(() => document.querySelector('#analyze-button').click());
@@ -134,7 +154,7 @@ try {
   const external = requests.filter((url) => !url.startsWith('http://localhost:11434/')
     && !url.startsWith('http://127.0.0.1:') && !url.startsWith(`chrome-extension://${extensionId}/`));
   assert.deepEqual(external, []);
-  console.log('PASS: unpacked extension, action/worker messaging, real page/selection/form inference, source excerpts, privacy, cancellation, navigation reset, no-form error, and localhost-only traffic.');
+  console.log('PASS: unpacked extension, action/worker messaging, real page/selection/form/guided inference, retained original controls, source excerpts, privacy, cancellation, navigation reset, no-form error, and localhost-only traffic.');
 } finally {
   await context?.close();
   await new Promise((resolve) => server.close(resolve));

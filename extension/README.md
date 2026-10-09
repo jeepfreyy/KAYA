@@ -8,6 +8,8 @@ See [project scope](../docs/kaya-project.md) and [setup](../docs/kaya-setup.md).
 - `panel.html`, `panel.js`, `styles.css`: responsive side panel and all result modes.
 - `form-reader.js`, `form-reader-client.js`: isolated native form metadata extraction.
 - `page-reader.js`, `page-reader-client.js`: visible page/selected-text extraction.
+- `guided-view.js`, `guided-view-client.js`: reversible navigation over the
+  website's original controls, using index-bound local-AI guidance.
 - `page-analysis.js`: page input/output validation with original source IDs.
 - `analysis-service.js`: live/sample routing and actionable errors.
 - `ollama.js`: local Qwen prompts, schema-constrained streaming, limits, timeouts.

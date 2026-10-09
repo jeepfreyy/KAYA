@@ -1,5 +1,16 @@
 # Kaya Mode verification
 
+## Guided-view development run — 2026-10-10
+
+- All 24 unit tests passed, including the guided response schema, bounded field
+  indexes, and exclusion of caller-provided values.
+- Browser UI, form reader, and page reader suites passed on the current checkout.
+- The guided-view browser check passed: AI field order was applied, original
+  controls remained inside their form, and exiting removed all Kaya page styling.
+- The real Chrome/Ollama suite passed all four modes on an Apple M5 MacBook Air:
+  page, selection, form guidance, and the new guided view. It also confirmed that
+  guided mode retains the original controls and excludes typed sentinels.
+
 ## Recorded local run — 2026-10-10
 
 - All 23 unit tests passed.
@@ -56,10 +67,12 @@ API. CI uses Playwright Chromium for unit/UI/reader checks and does not run a mo
    Explain selected text, Analyze. Only that passage should be explained.
 5. Choose Help me with this form, Analyze. Expect the overview, preparation
    checklist, and first step. Check an item as you prepare.
-6. Use fictional input values. Repeat analysis; typed answers must not be repeated
+6. Choose Simplify this form on the page, Analyze. Use Next and Previous in the
+   page guide, confirm the original fields still work, then choose Exit.
+7. Use fictional input values. Repeat analysis; typed answers must not be repeated
    because the readers exclude control values.
-7. Cancel a request, try the no-form page in form mode, and recover with the practice page.
-8. Select Sample: community workshop registration. Expect SAMPLE AI RESPONSE and
+8. Cancel a request, try the no-form page in form mode, and recover with the practice page.
+9. Select Sample: community workshop registration. Expect SAMPLE AI RESPONSE and
    the fictional example notice, with no page read or model request.
 
 ## Remaining manual checks before presenting
@@ -70,7 +83,7 @@ API. CI uses Playwright Chromium for unit/UI/reader checks and does not run a mo
 - [ ] Close the panel during analysis, reopen it, and retry.
 - [ ] Stop the project Ollama server, check the unavailable message, restart, retry.
 - [ ] Disconnect internet while retaining localhost, then repeat the demo.
-- [ ] Reproduce macOS setup if a Mac will be used for presentation.
+- [x] Reproduce macOS setup if a Mac will be used for presentation.
 
 ## Limits
 

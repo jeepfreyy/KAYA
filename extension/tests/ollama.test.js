@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeWithOllama, checkOllama, prepareMetadata, validateGuidance, MODEL } from '../ollama.js';
+import { analyzeWithOllama, checkOllama, prepareMetadata, validateGuidance, validateGuidedView, MODEL } from '../ollama.js';
 const metadata = { fields: [{ label: 'Name', type: 'text', placeholder: '', required: true, options: [], value: 'PRIVATE_VALUE' }] };
 const guidance = { overview: 'A registration form.', preparationChecklist: ['Your name'], firstStep: 'Enter your name.' };
 function streamed(content = JSON.stringify(guidance), final = {}) {
@@ -38,6 +38,25 @@ test('split UTF-8 stream preserves Unicode and safely treats text as data', asyn
     ...guidance, overview: 'Kaya mo ’to 🌱 <script>alert(1)</script>',
   })) });
   assert.equal(result.overview, 'Kaya mo ’to 🌱 <script>alert(1)</script>');
+});
+
+test('guided form requests produce a complete, source-indexed view plan', async () => {
+  const guided = { ...guidance, fieldGuidance: [{ fieldIndex: 0, plainLabel: 'Your name', helpText: 'Enter the name requested by this form.' }] };
+  const result = await analyzeWithOllama({ kind: 'guided', ...metadata }, { fetchImpl: async (_url, request) => {
+    const body = JSON.parse(request.body);
+    assert.ok(body.format.required.includes('fieldGuidance'));
+    assert.deepEqual(body.format.properties.fieldGuidance.items.properties.fieldIndex.enum, [0]);
+    assert.match(body.messages[0].content, /original input/);
+    assert.ok(!request.body.includes('PRIVATE_VALUE'));
+    return streamed(JSON.stringify(guided));
+  } });
+  assert.equal(result.kind, 'guided');
+  assert.deepEqual(result.fieldGuidance, guided.fieldGuidance);
+  assert.throws(() => validateGuidedView({ ...guided, fieldGuidance: [] }, metadata.fields), { code: 'INVALID_RESPONSE' });
+  assert.equal(validateGuidedView({ ...guided, fieldGuidance: [guided.fieldGuidance[0], guided.fieldGuidance[0]] }, metadata.fields).fieldGuidance.length, 1);
+  const twoFields = [...metadata.fields, { label: 'Email', type: 'email', placeholder: '', required: false, options: [] }];
+  const completed = validateGuidedView(guided, twoFields).fieldGuidance;
+  assert.deepEqual(completed[1], { fieldIndex: 1, plainLabel: 'Email', helpText: 'This field is optional or is not marked required.' });
 });
 
 test('invalid, incomplete, oversized, or token-limited model output is rejected', async () => {

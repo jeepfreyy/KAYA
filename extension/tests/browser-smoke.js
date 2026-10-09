@@ -11,6 +11,7 @@ const files = new Map([
   ['/panel.js', 'text/javascript'], ['/analysis-service.js', 'text/javascript'],
   ['/page-reader.js', 'text/javascript'], ['/page-reader-client.js', 'text/javascript'], ['/page-analysis.js', 'text/javascript'],
   ['/form-reader-client.js', 'text/javascript'], ['/form-reader.js', 'text/javascript'],
+  ['/guided-view-client.js', 'text/javascript'], ['/guided-view.js', 'text/javascript'],
   ['/local-ai-client.js', 'text/javascript'], ['/ollama.js', 'text/javascript'],
 ]);
 const server = createServer(async (request, response) => {

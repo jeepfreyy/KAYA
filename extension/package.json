@@ -1,12 +1,12 @@
 {
   "name": "kaya-mode-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser-smoke.js",
-    "test:reader": "node tests/form-reader-browser.js && node tests/page-reader-browser.js",
+    "test:reader": "node tests/form-reader-browser.js && node tests/page-reader-browser.js && node tests/guided-view-browser.js",
     "test:live": "node tests/live-extension.js"
   },
   "devDependencies": { "playwright": "1.62.1" },

@@ -17,6 +17,23 @@ export const responseSchema = {
   },
 };
 
+export const guidedResponseSchema = {
+  type: 'object', additionalProperties: false,
+  required: ['overview', 'preparationChecklist', 'firstStep', 'fieldGuidance'],
+  properties: {
+    ...responseSchema.properties,
+    fieldGuidance: { type: 'array', minItems: 1, maxItems: 50, items: {
+      type: 'object', additionalProperties: false,
+      required: ['fieldIndex', 'plainLabel', 'helpText'],
+      properties: {
+        fieldIndex: { type: 'integer', minimum: 0 },
+        plainLabel: { type: 'string', minLength: 1, maxLength: 200 },
+        helpText: { type: 'string', minLength: 1, maxLength: 400 },
+      },
+    } },
+  },
+};
+
 export function validateGuidance(value) {
   const text = (item, max) => typeof item === 'string' && item.trim().length > 0 && item.length <= max;
   if (!value || !text(value.overview, 2000) || !text(value.firstStep, 800)
@@ -30,6 +47,34 @@ export function validateGuidance(value) {
     preparationChecklist: value.preparationChecklist.map((item) => item.trim()),
     firstStep: value.firstStep.trim(),
   };
+}
+
+export function validateGuidedView(value, fields) {
+  const guidance = validateGuidance(value);
+  const text = (item, max) => typeof item === 'string' && item.trim().length > 0 && item.length <= max;
+  const seen = new Set();
+  if (!Array.isArray(value.fieldGuidance) || !value.fieldGuidance.length || value.fieldGuidance.length > 50) {
+    throw new LocalAIError('INVALID_RESPONSE');
+  }
+  const fieldGuidance = [];
+  for (const item of value.fieldGuidance) {
+    if (!item || !Number.isInteger(item.fieldIndex) || item.fieldIndex < 0
+      || item.fieldIndex >= fields.length || !text(item.plainLabel, 200) || !text(item.helpText, 400)) {
+      throw new LocalAIError('INVALID_RESPONSE');
+    }
+    if (seen.has(item.fieldIndex)) continue;
+    seen.add(item.fieldIndex);
+    fieldGuidance.push({ fieldIndex: item.fieldIndex, plainLabel: item.plainLabel.trim(), helpText: item.helpText.trim() });
+  }
+  // Small local models can omit or repeat an index even under a JSON schema.
+  // Complete the sequence from trusted metadata rather than rejecting useful guidance.
+  fields.forEach((field, fieldIndex) => {
+    if (seen.has(fieldIndex)) return;
+    const plainLabel = field?.label?.trim() || field?.placeholder?.trim() || field?.type?.trim() || `Field ${fieldIndex + 1}`;
+    fieldGuidance.push({ fieldIndex, plainLabel,
+      helpText: field?.required ? 'This field is marked required.' : 'This field is optional or is not marked required.' });
+  });
+  return { ...guidance, fieldGuidance };
 }
 
 export function prepareMetadata(metadata) {
@@ -63,6 +108,9 @@ Return JSON matching the supplied schema: overview, preparationChecklist, firstS
 Use plain English. Overview: one or two short sentences. Checklist: 1 to 6 concise items based only on visible metadata; distinguish required from optional. First step: one specific, low-effort action using an actual field label.
 Missing or ambiguous labels mean uncertainty: explicitly acknowledge it instead of guessing. File fields without a document label do not establish which document is required. If no preparation is specified, say so. This may be only part of a form. Never claim to have submitted or filled anything. No markdown or extra keys.`;
 
+const GUIDED_PROMPT = `${SYSTEM_PROMPT}
+Also return fieldGuidance for the clearest useful order in which to visit the provided fields. Include every field exactly once. fieldIndex is the field's zero-based position in the fields array. plainLabel simplifies only the supplied label, type, placeholder, and options; helpText briefly explains what the visible metadata asks for. Never infer a person's answer or change whether a field is required. The extension will show this guidance beside the website's original input; do not claim the input was replaced, filled, or submitted.`;
+
 function httpError(status) {
   if (status === 404) return new LocalAIError('MODEL_MISSING');
   if (status === 403) return new LocalAIError('ORIGIN_BLOCKED');
@@ -90,13 +138,16 @@ export async function analyzeWithOllama(input, {
   fetchImpl = fetch, signal, timeoutMs = REQUEST_TIMEOUT_MS, onProgress = () => {},
 } = {}) {
   const isPage = ['page', 'selection'].includes(input?.kind);
+  const isGuided = input?.kind === 'guided';
   const { metadata, truncated } = isPage ? preparePage(input) : prepareMetadata(input);
-  const format = isPage ? structuredClone(pageResponseSchema) : responseSchema;
+  const format = isPage ? structuredClone(pageResponseSchema)
+    : isGuided ? structuredClone(guidedResponseSchema) : responseSchema;
   if (isPage) {
     const ids = metadata.blocks.map((block) => block.id);
     format.properties.keyPoints.items.properties.sourceId.enum = ids;
     format.properties.nextStepSourceId.enum = ['', ...ids];
   }
+  if (isGuided) format.properties.fieldGuidance.items.properties.fieldIndex.enum = metadata.fields.map((_field, index) => index);
   const controller = new AbortController();
   const abort = () => controller.abort();
   if (signal?.aborted) throw new LocalAIError('CANCELLED');
@@ -113,8 +164,8 @@ export async function analyzeWithOllama(input, {
       method: 'POST', signal: controller.signal, redirect: 'error', credentials: 'omit',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL, stream: true, format, keep_alive: '10m',
-        options: { temperature: 0.2, num_ctx: 4096, num_predict: 700, seed: 42 },
-        messages: [{ role: 'system', content: isPage ? PAGE_PROMPT : SYSTEM_PROMPT }, { role: 'user', content: JSON.stringify(metadata) }],
+        options: { temperature: 0.2, num_ctx: 4096, num_predict: isGuided ? 1600 : 700, seed: 42 },
+        messages: [{ role: 'system', content: isPage ? PAGE_PROMPT : isGuided ? GUIDED_PROMPT : SYSTEM_PROMPT }, { role: 'user', content: JSON.stringify(metadata) }],
       }),
     });
     clearTimeout(firstByte);
@@ -150,8 +201,9 @@ export async function analyzeWithOllama(input, {
     if (!final || final.done_reason === 'length') throw new LocalAIError('INVALID_RESPONSE');
     let parsed;
     try { parsed = JSON.parse(content); } catch { throw new LocalAIError('INVALID_RESPONSE'); }
-    return { ...(isPage ? validatePageGuidance(parsed, metadata.blocks) : validateGuidance(parsed)), source: 'live', model: MODEL,
-      kind: isPage ? input.kind : 'form',
+    return { ...(isPage ? validatePageGuidance(parsed, metadata.blocks)
+      : isGuided ? validateGuidedView(parsed, metadata.fields) : validateGuidance(parsed)), source: 'live', model: MODEL,
+      kind: isPage ? input.kind : isGuided ? 'guided' : 'form',
       durationMs: Math.round(performance.now() - started),
       inferenceDurationMs: Number.isFinite(final.total_duration) ? Math.round(final.total_duration / 1e6) : null,
       ...(isPage ? { sources: metadata.blocks, excerptCount: metadata.blocks.length } : { fieldCount: metadata.fields.length }), truncated };

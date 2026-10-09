@@ -1,6 +1,6 @@
 import { readActiveFormMetadata } from './form-reader-client.js';
 import { requestLocalAI } from './local-ai-client.js';
-import { validateGuidance } from './ollama.js';
+import { validateGuidance, validateGuidedView } from './ollama.js';
 import { readActivePage } from './page-reader-client.js';
 import { validatePageGuidance } from './page-analysis.js';
 
@@ -18,6 +18,11 @@ export function validateAnalysis(result) {
   if (['page', 'selection'].includes(result?.kind)) {
     if (result.source !== 'live' || !Array.isArray(result.sources)) throw new AnalysisError('INVALID_RESPONSE');
     validatePageGuidance(result, result.sources);
+    return result;
+  }
+  if (result?.kind === 'guided') {
+    if (result.source !== 'live' || !Number.isInteger(result.fieldCount) || result.fieldCount < 1) throw new AnalysisError('INVALID_RESPONSE');
+    validateGuidedView(result, Array.from({ length: result.fieldCount }));
     return result;
   }
   validateGuidance(result);
@@ -41,12 +46,14 @@ export async function analyzeForm({ scenario = 'page', signal, onStatus = () => 
     onStatus('Local AI is simplifying the text…');
     return validateAnalysis(await requestLocalAI('analyze', metadata, { signal }));
   }
-  if (scenario === 'live') {
+  if (['live', 'guided'].includes(scenario)) {
     onStatus('Reading supported fields on this page…');
     const metadata = await readActiveFormMetadata();
     if (signal?.aborted) throw new AnalysisError('CANCELLED');
-    onStatus(`Read ${metadata.fields.length} fields. Local AI is preparing your guidance…`);
-    return validateAnalysis(await requestLocalAI('analyze', metadata, { signal }));
+    onStatus(`Read ${metadata.fields.length} fields. Local AI is preparing ${scenario === 'guided' ? 'a guided view' : 'your guidance'}…`);
+    const input = scenario === 'guided' ? { kind: 'guided', fields: metadata.fields } : metadata;
+    const result = validateAnalysis(await requestLocalAI('analyze', input, { signal }));
+    return scenario === 'guided' ? { ...result, fieldMetadata: metadata.fields } : result;
   }
   // Intentional demo delay so the loading state can be reviewed without a model.
   await new Promise((resolve) => setTimeout(resolve, 900));

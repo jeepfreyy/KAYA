@@ -48,8 +48,8 @@ node scripts/serve-kaya-demo.mjs
 ```
 
 The project server owns .kaya-runtime/models; CLI pull requests use that server.
-Ctrl+C stops each terminal's service. These steps are provided for reproduction;
-Mac execution remains unverified because this session's machine is Windows.
+Ctrl+C stops each terminal's service. This path was verified on an Apple M5
+MacBook Air with 16 GB unified memory and Ollama 0.40.2.
 
 ## Load and use
 
@@ -57,13 +57,16 @@ Mac execution remains unverified because this session's machine is Windows.
 2. Choose Load unpacked, select extension/, and pin Kaya Mode.
 3. After pulling/editing files, click Reload on the extension card.
 4. Open http://localhost:4173 and click the Kaya Mode toolbar icon.
-5. Choose **Explain this page**, **Explain selected text**, or **Help me with this form**.
+5. Choose **Explain this page**, **Explain selected text**, **Help me with this form**,
+   or **Simplify this form on the page**.
 6. Select **Check local AI**, then **Analyze**. For selected text, highlight a paragraph on the practice page first.
 
 The toolbar action grants temporary page access. Keep the side panel open during
 analysis. Cancel or close it to abort. Real results say LOCAL AI RESPONSE and
 show model, elapsed time, and field or excerpt count. Samples never replace live failures.
 Nothing fills/submits the form or saves results after panel closure. Navigation and tab changes clear previous answers.
+Guided view highlights and focuses the website's original controls in an AI-selected
+order. Use its Exit button to remove the overlay and highlighting.
 
 ## Configuration and troubleshooting
 

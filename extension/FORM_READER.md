@@ -15,6 +15,8 @@ The form contract remains separate from the page and selected-text modes.
 The reader runs on demand in Chrome's isolated world, in the active tab's main
 frame. It reads the current DOM each time, so fields added since a previous call
 are included. It performs no network requests, writes, field filling, or submission.
+Guided view binds AI guidance to these zero-based DOM positions and repeats the
+same bounded visible-control scan before applying it. It never moves or clones a control.
 
 The live flow uses this interface:
 

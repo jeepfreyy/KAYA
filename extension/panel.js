@@ -1,5 +1,6 @@
 import { analyzeForm, getErrorMessage, validateAnalysis } from './analysis-service.js';
 import { requestLocalAI } from './local-ai-client.js';
+import { hideGuidedView, showGuidedView } from './guided-view-client.js';
 
 const elements = Object.fromEntries([
   'assistant', 'analyze-form', 'scenario', 'analyze-button', 'button-label',
@@ -12,7 +13,7 @@ const elements = Object.fromEntries([
 let isLoading = false;
 let controller;
 let generation = 0;
-const isSample = () => !['page', 'selection', 'live'].includes(elements.scenario.value);
+const isSample = () => !['page', 'selection', 'live', 'guided'].includes(elements.scenario.value);
 
 function setLoading(loading) {
   isLoading = loading;
@@ -100,8 +101,12 @@ elements['analyze-form'].addEventListener('submit', async (event) => {
     const result = await analyzeForm({ scenario: elements.scenario.value, signal: controller.signal,
       onStatus: (message) => { if (current === generation) elements.status.textContent = message; } });
     if (current !== generation) return;
+    if (result.kind === 'guided') await showGuidedView(result);
+    if (current !== generation) return;
     renderResults(result);
-    elements.status.textContent = `${sample ? 'Sample' : 'Explanation'} ready. Read your guidance below.`;
+    elements.status.textContent = result.kind === 'guided'
+      ? 'Guided view is active on the page. Use its controls to move through the original fields.'
+      : `${sample ? 'Sample' : 'Explanation'} ready. Read your guidance below.`;
     elements['results-title'].focus();
   } catch (error) {
     if (current === generation) showError(error);
@@ -118,6 +123,7 @@ function reset(message) {
 }
 
 elements.scenario.addEventListener('change', () => {
+  void hideGuidedView();
   const sample = isSample();
   reset(sample ? 'Sample selected. Select Analyze when you’re ready.'
     : elements.scenario.value === 'selection' ? 'Highlight a paragraph on the website, then select Analyze.'
@@ -126,8 +132,8 @@ elements.scenario.addEventListener('change', () => {
   elements['notice-title'].textContent = sample ? 'Sample AI responses · demo only' : 'On your computer. At your pace.';
   elements['notice-copy'].textContent = sample
     ? 'Fictional examples, not analysis of this page. No page content is read or sent in sample mode.'
-    : elements.scenario.value === 'live'
-      ? 'Only field labels and requirements go to local Ollama. Entered values, passwords, and uploaded files are excluded.'
+    : ['live', 'guided'].includes(elements.scenario.value)
+      ? 'Only field labels, types, requirements, placeholders, and options go to local Ollama. Entered values, passwords, and uploaded files are excluded.'
       : 'Visible page text goes to local Ollama only when you select Analyze. Text in input fields is excluded. Personal details already printed on the page may be included.';
 });
 elements['cancel-button'].addEventListener('click', () => controller?.abort());

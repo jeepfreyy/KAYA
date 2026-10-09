@@ -5,7 +5,7 @@ Understand a web page. Make sense of a confusing paragraph. Take a form one step
 Kaya Mode is a Chrome/Edge extension with a resizable side panel and real local AI
 using Qwen 2.5 3B through Ollama. It reads only after you select **Analyze**.
 
-## Three ways to use it
+## Four ways to use it
 
 - **Explain this page**: a plain-language overview, important points with original
   source excerpts, and a supported next step.
@@ -13,10 +13,13 @@ using Qwen 2.5 3B through Ollama. It reads only after you select **Analyze**.
   passage. Expand the original excerpts to compare them with the explanation.
 - **Help me with this form**: the overview, preparation checklist, and first step
   specified in the hackathon program. It reads field metadata, not typed answers.
+- **Simplify this form on the page**: local AI creates a field-by-field guide and
+  Kaya highlights each website control in a clearer order. The original controls
+  remain in their form with their existing values, validation, and event handlers.
 
 The separately labeled sample mode works without Ollama and never substitutes for
-a failed live analysis. Kaya explains the page in its side panel; it does not
-rewrite the website, fill fields, submit forms, or guarantee that AI advice is correct.
+a failed live analysis. Guided view adds a removable guide and highlight without
+replacing controls. Kaya does not fill or submit forms or guarantee that AI advice is correct.
 
 ## Try it on Windows
 
@@ -36,7 +39,8 @@ If setup has already completed, use `scripts/start-kaya-ollama.ps1` instead of
 3. Open `http://localhost:4173` and click Kaya Mode's toolbar icon.
 4. Select **Check local AI**, then **Explain this page** → **Analyze**.
 5. Try the paragraph beginning “Registration is provisional” with **Explain selected text**.
-6. Choose **Help me with this form** for the checklist and first step.
+6. Choose **Help me with this form** for the checklist and first step, then try
+   **Simplify this form on the page** to navigate the original fields.
 
 Drag the panel's left edge to adjust its width. Click Kaya's toolbar icon again
 when changing websites to grant temporary access. Navigation clears old answers.

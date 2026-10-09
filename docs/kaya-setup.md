@@ -57,13 +57,18 @@ MacBook Air with 16 GB unified memory and Ollama 0.40.2.
 2. Choose Load unpacked, select extension/, and pin Kaya Mode.
 3. After pulling/editing files, click Reload on the extension card.
 4. Open http://localhost:4173 and click the Kaya Mode toolbar icon.
-5. Choose **Explain this page**, **Explain selected text**, **Help me with this form**,
-   or **Simplify this form on the page**.
-6. Select **Check local AI**, then **Analyze**. For selected text, highlight a paragraph on the practice page first.
+5. Choose **Explain this page**, **Explain selected words**, **Help me with a form**, or **Read a screenshot**.
+6. To check the connection, open **Need help getting started?** and select **Check if Kaya is ready**. For selected words, highlight a paragraph on the practice page first.
+7. After a form guide appears, choose **Guide me field by field** if you want help beside the original controls.
+
+Screenshot reading supports PNG, JPEG, and WebP images up to 10 MB. Kaya can also
+capture the currently visible webpage. Drag across the preview to focus on a smaller
+area, then choose **Read these words**. OCR runs from packaged local files and images
+are not saved. Any personal details visible in the chosen image can be recognized.
 
 The toolbar action grants temporary page access. Keep the side panel open during
-analysis. Cancel or close it to abort. Real results say LOCAL AI RESPONSE and
-show model, elapsed time, and field or excerpt count. Samples never replace live failures.
+analysis. Cancel or close it to abort. Model, elapsed time, and field or excerpt count
+are available under **Technical details**.
 Nothing fills/submits the form or saves results after panel closure. Navigation and tab changes clear previous answers.
 Guided view highlights and focuses the website's original controls in an AI-selected
 order. Use its Exit button to remove the overlay and highlighting.
@@ -84,7 +89,7 @@ The extension calls localhost:11434. Its manifest public key stabilizes its ID.
 Ollama also permits its built-in localhost origins; no network-wide bind or
 wildcard extension origin is added.
 
-- Unavailable: start the server and select Check local AI.
+- Unavailable: start the server and select **Check if Kaya is ready** under help.
 - Missing model: finish setup/pull before retrying.
 - Origin blocked: restart Ollama with the exact origin above. A running process
   does not inherit another shell's new settings.
@@ -109,7 +114,7 @@ npm run test:live --prefix extension
 Installed Chrome is used by browser tests; live testing needs its recent CDP
 Extensions testing API. CI runs unit/UI/reader tests with Playwright Chromium,
 not a local model. After downloads, disconnect internet while retaining localhost
-and repeat Analyze before presenting. Use fictional data.
+and repeat each kind of help before presenting. Use fictional data.
 
 References: [Windows](https://docs.ollama.com/windows),
 [Ollama configuration](https://docs.ollama.com/faq),

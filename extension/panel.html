@@ -1,88 +1,139 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-PH">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kaya Mode</title>
-    <link rel="stylesheet" href="styles.css">
-    <script type="module" src="panel.js"></script>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="assistant" id="assistant" aria-busy="false">
-      <header class="header">
-        <div class="brand"><span class="brand-mark" aria-hidden="true">k.</span><span>Kaya Mode</span></div>
-        <span class="badge" id="mode-badge">LOCAL AI</span>
+    <main class="shell" id="assistant" aria-busy="false">
+      <header class="topbar">
+        <div class="brand" aria-label="Kaya Mode">
+          <span class="brand-mark" aria-hidden="true">K</span>
+          <span>Kaya Mode</span>
+        </div>
+        <span class="privacy-badge"><span aria-hidden="true">●</span> Private</span>
       </header>
 
-      <section class="intro" aria-labelledby="intro-title">
-        <p class="eyebrow">A LITTLE CLARITY. A FIRST STEP.</p>
-        <h1 id="intro-title">A clearer page.<br>A simpler next step.</h1>
-        <p class="intro-copy">Understand what you’re reading, untangle a confusing paragraph, or get ready to fill in a form.</p>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">One step at a time</p>
+        <h1 id="page-title">What do you need help with?</h1>
+        <p>Choose one option. Kaya will give you a short, clear guide.</p>
       </section>
 
-      <aside class="sample-notice" id="sample-notice">
-        <strong id="notice-title">On your computer. At your pace.</strong>
-        <p id="notice-copy">Visible page text goes to local Ollama only when you select Analyze. Text in input fields is excluded. Personal details already printed on the page may be included.</p>
+      <aside class="privacy-note" aria-label="Privacy information">
+        <span class="privacy-icon" aria-hidden="true">✓</span>
+        <div>
+          <strong>You are in control.</strong>
+          <p>Page and form tools never read what you type. The screenshot reader reads only the image you choose.</p>
+        </div>
       </aside>
 
-      <form id="analyze-form">
-        <label class="field-label" for="scenario">What would you like to analyze?</label>
-        <select id="scenario" name="scenario" aria-describedby="sample-notice">
-          <option value="page">Explain this page</option>
-          <option value="selection">Explain selected text</option>
-          <option value="live">Help me with this form</option>
-          <option value="guided">Simplify this form on the page</option>
-          <option value="success">Sample: community workshop registration</option>
-          <option value="no-form">Demo error: no form found</option>
-          <option value="unavailable">Demo error: AI unavailable</option>
-        </select>
-        <button class="analyze-button" id="analyze-button" type="submit">
-          <span class="spinner" id="spinner" hidden aria-hidden="true"></span>
-          <span id="button-label">Analyze</span>
-          <span class="button-arrow" id="button-arrow" aria-hidden="true">↗</span>
-        </button>
-        <button class="secondary-button" id="cancel-button" type="button" hidden>Cancel analysis</button>
-      </form>
+      <section class="task-picker" id="task-picker" aria-labelledby="task-title">
+        <h2 id="task-title" tabindex="-1">Choose what you need</h2>
+        <div class="task-list" id="task-list">
+          <button class="task-button" id="task-page" type="button" data-scenario="page">
+            <span class="task-icon" aria-hidden="true">Aa</span>
+            <span class="task-copy"><strong>Explain this page</strong><small>Get the important points in simple words.</small></span>
+            <span class="task-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="task-button" id="task-selection" type="button" data-scenario="selection">
+            <span class="task-icon" aria-hidden="true">“ ”</span>
+            <span class="task-copy"><strong>Explain selected words</strong><small>Highlight confusing text on the page first.</small></span>
+            <span class="task-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="task-button" id="task-form" type="button" data-scenario="live">
+            <span class="task-icon" aria-hidden="true">□</span>
+            <span class="task-copy"><strong>Help me with a form</strong><small>See what to prepare and where to begin.</small></span>
+            <span class="task-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="task-button" id="task-image" type="button">
+            <span class="task-icon" aria-hidden="true">▣</span>
+            <span class="task-copy"><strong>Read a screenshot</strong><small>For words or menus you cannot highlight.</small></span>
+            <span class="task-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <section class="image-workflow" id="image-workflow" aria-labelledby="image-title" hidden>
+          <div class="image-heading">
+            <div>
+              <p class="eyebrow">Screenshot reader</p>
+              <h3 id="image-title" tabindex="-1">Choose an image</h3>
+            </div>
+            <button class="text-button compact-button" id="close-image" type="button">Back</button>
+          </div>
+          <p class="image-help">Open a menu before taking a screenshot, or upload an image already on your computer.</p>
+          <div class="image-source-actions">
+            <button class="secondary-button" id="capture-image" type="button">Take page screenshot</button>
+            <label class="secondary-button upload-button" for="image-upload">Upload an image</label>
+            <input id="image-upload" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+          </div>
+          <div class="image-preview" id="image-preview" hidden>
+            <canvas id="image-canvas" aria-label="Screenshot preview. Drag to select only the words you want Kaya to read."></canvas>
+            <p>Optional: drag over the words you want Kaya to read.</p>
+            <button class="primary-button" id="read-image" type="button">Read these words</button>
+          </div>
+          <p class="image-privacy">The image is processed on this computer and is not saved.</p>
+        </section>
+        <div class="loading-row" id="loading-row" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="loading-label">Kaya is preparing your guide…</span>
+        </div>
+        <button class="text-button cancel-button" id="cancel-button" type="button" hidden>Cancel</button>
+      </section>
 
-      <p class="status" id="status" role="status" aria-live="polite" aria-atomic="true">Open a website and select Analyze. Drag the side panel’s edge to resize it.</p>
-      <div class="utility-links">
-        <button id="check-ai" type="button">Check local AI</button>
-        <a href="setup.html" target="_blank">Setup guide</a>
-        <a href="http://localhost:4173" target="_blank">Practice page ↗</a>
-      </div>
+      <p class="status" id="status" role="status" aria-live="polite">Choose an option above to begin.</p>
 
-      <section class="error-card" id="error" role="alert" aria-atomic="true" hidden>
-        <h2 id="error-title"></h2>
-        <p id="error-message"></p>
+      <details class="help-panel" id="help-panel">
+        <summary>Need help getting started?</summary>
+        <div class="help-content">
+          <p>If Kaya does not respond, check that the local AI is ready.</p>
+          <button class="secondary-button" id="check-ai" type="button">Check if Kaya is ready</button>
+          <nav class="help-links" aria-label="Help links">
+            <a href="setup.html" target="_blank" rel="noreferrer">Open setup guide</a>
+          </nav>
+        </div>
+      </details>
+
+      <section class="error-card" id="error-card" role="alert" hidden>
+        <div class="error-mark" aria-hidden="true">!</div>
+        <div>
+          <h2 id="error-title">Kaya needs a moment</h2>
+          <p id="error-message"></p>
+          <button class="secondary-button retry-button" id="retry-button" type="button">Try again</button>
+        </div>
       </section>
 
       <section class="results" id="results" aria-labelledby="results-title" hidden>
         <div class="results-heading">
-          <h2 id="results-title" tabindex="-1">Your starting point</h2>
-          <span class="sample-label" id="result-source">LOCAL AI RESPONSE</span>
+          <div><p class="eyebrow" id="result-source">Kaya's guide</p><h2 id="results-title" tabindex="-1">Here is your simple guide</h2></div>
+          <span class="result-badge" id="mode-badge">Ready</span>
         </div>
-        <p class="result-meta" id="result-meta"></p>
+        <section class="first-step-card" aria-labelledby="first-step-title">
+          <p class="card-label" id="first-step-title">Start here</p>
+          <p id="first-step"></p>
+          <p class="first-step-source" id="next-step-source" hidden></p>
+        </section>
         <section class="result-card" aria-labelledby="overview-title">
-          <p class="section-number" aria-hidden="true">01 / UNDERSTAND</p>
-          <h3 id="overview-title">Overview</h3>
+          <h3 id="overview-title">What this means</h3>
           <p id="overview"></p>
         </section>
         <section class="result-card" aria-labelledby="checklist-title">
-          <p class="section-number" aria-hidden="true">02 / GET READY</p>
-          <h3 id="checklist-title">Preparation checklist</h3>
-          <p class="checklist-hint" id="checklist-hint">Check things off as you get ready.</p>
+          <h3 id="checklist-title">Helpful points</h3>
           <ul class="checklist" id="checklist"></ul>
         </section>
-        <section class="result-card first-step" aria-labelledby="first-step-title">
-          <p class="section-number" aria-hidden="true">03 / BEGIN</p>
-          <h3 id="first-step-title">First step</h3>
-          <p id="first-step"></p>
-          <div id="next-step-source"></div>
-        </section>
-        <p class="results-footnote" id="results-footnote">Based on supported fields only. Check the actual form’s instructions; AI can make mistakes.</p>
+        <div class="result-actions">
+          <button class="primary-button guide-button" id="guide-form-button" type="button" hidden>Guide me field by field</button>
+          <button class="secondary-button" id="read-aloud-button" type="button" aria-pressed="false">Read this aloud</button>
+          <button class="text-button" id="new-task-button" type="button">Choose something else</button>
+        </div>
+        <details class="technical-details"><summary>Technical details</summary><p id="result-meta"></p></details>
+        <p class="results-footnote" id="results-footnote">Kaya gives guidance only. Review important details before you continue.</p>
       </section>
 
-      <footer>One step at a time. <strong>Kaya mo ’to.</strong></footer>
+      <footer><span>One step at a time.</span><span class="footer-accent">Kaya mo 'to.</span></footer>
     </main>
+    <script src="vendor/tesseract/tesseract.min.js"></script>
+    <script type="module" src="panel.js"></script>
   </body>
 </html>

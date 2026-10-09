@@ -9,6 +9,7 @@ const guidance = { summary: 'You can register for free.', keyPoints: [{ text: 'N
 
 test('page metadata is whitelisted, bounded, and rejects duplicate or malformed source IDs', () => {
   assert.deepEqual(preparePage(input), { metadata: { kind: 'page', blocks: input.blocks }, truncated: false });
+  assert.deepEqual(preparePage({ ...input, kind: 'image' }).metadata.kind, 'image');
   for (const bad of [{ ...input, blocks: [] }, { ...input, blocks: [input.blocks[0], input.blocks[0]] },
     { ...input, blocks: [{ id: 'unknown', text: 'Text' }] }, { ...input, blocks: [{ id: 's1', text: '' }] }]) {
     assert.throws(() => preparePage(bad), { code: 'INVALID_RESPONSE' });

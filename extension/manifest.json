@@ -1,12 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Kaya Mode",
-  "version": "0.3.0",
-  "description": "Understand pages and forms, or guide users through original form fields, using local AI through Ollama.",
+  "version": "0.4.0",
+  "description": "Understand pages, screenshots, and forms, or get a field-by-field guide using local AI.",
   "minimum_chrome_version": "126",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8Uy8ALlTdZBVnNwS1j8lp9kUbpe7BhQC2QtwDxdhjAh7N7gBFTjgFx0OkvGpZ3w4Eb6r5KQ8Ta6jolo1xOcpuWB/LawjZZi29s0KYxScc5YmJHmIqPOaDvwWpLJr7mYtmb1xHNFcFemoM5EgHZ4IllTToAaku8bx+VKgsDE367pNBAL4lM4XCChMm4G3zYqzvPVnMpRGfG3wSpCmf1mn4/fKCgCiEw39imyDfv/caZZfa2U/iapDy4lgs2FVZR2nCFLE/OcZX5OqJyiRKtBVOUnnIey+1RcIll7wwDYUCkQXxYWRaq6ZHrqFixoJV1vvZHiAySjA8j1qpUaFJW5KiwIDAQAB",
   "permissions": ["activeTab", "scripting", "sidePanel"],
   "host_permissions": ["http://localhost:11434/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
   "background": { "service_worker": "background.js", "type": "module" },
   "action": { "default_title": "Open Kaya Mode" },
   "side_panel": { "default_path": "panel.html" }

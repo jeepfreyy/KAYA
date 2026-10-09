@@ -53,7 +53,7 @@ test('errors provide recovery guidance without exposing raw exceptions', () => {
   for (const code of ['NO_FORM', 'AI_UNAVAILABLE', 'INVALID_RESPONSE']) {
     const message = getErrorMessage(new AnalysisError(code, 'private internal detail'));
     assert.ok(message.title);
-    assert.match(message.message, /Analyze/);
+    assert.match(message.message, /try|choose|open|highlight|reload|follow|wait/i);
     assert.ok(!message.message.includes('private internal detail'));
   }
   assert.deepEqual(getErrorMessage(new Error('private internal detail')), getErrorMessage(null));

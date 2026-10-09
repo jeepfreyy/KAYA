@@ -15,7 +15,7 @@ export class AnalysisError extends Error {
 }
 
 export function validateAnalysis(result) {
-  if (['page', 'selection'].includes(result?.kind)) {
+  if (['page', 'selection', 'image'].includes(result?.kind)) {
     if (result.source !== 'live' || !Array.isArray(result.sources)) throw new AnalysisError('INVALID_RESPONSE');
     validatePageGuidance(result, result.sources);
     return result;
@@ -84,40 +84,54 @@ export async function analyzeForm({ scenario = 'page', signal, onStatus = () => 
 export function getErrorMessage(error) {
   switch (error?.code) {
     case 'SAMPLE_NO_FORM':
-      return { title: 'Sample error: no form found', message: 'A connected reader would ask you to open a page with a form. To see sample results now, choose “Community workshop registration” and select Analyze again.' };
+      return { title: 'Sample error: no form found', message: 'Open a page with a visible form, then choose “Help me with a form.”' };
     case 'SAMPLE_AI_UNAVAILABLE':
-      return { title: 'Sample error: AI unavailable', message: 'A connected assistant would ask you to check that Ollama is running and try again. For this demo, choose “Community workshop registration” and select Analyze.' };
+      return { title: 'Sample error: AI unavailable', message: 'Open “Need help getting started?”, check if Kaya is ready, then try again.' };
     case 'INVALID_RESPONSE':
-      return { title: 'We couldn’t use that response', message: 'The response was incomplete. Select Analyze to try again.' };
+      return { title: 'We couldn’t use that response', message: 'The guide was incomplete. Choose “Try again.”' };
     case 'NO_FORM':
-      return { title: 'No supported form found', message: 'Open a page with visible standard form fields, then select Analyze. Embedded forms and custom widgets may not be supported.' };
+      return { title: 'No supported form found', message: 'Open a page with a visible form, then choose “Help me with a form.” Some embedded forms may not work.' };
     case 'UNSUPPORTED_PAGE':
       return { title: 'This page can’t be analyzed', message: 'Open a regular website or the practice form. Browser settings, extension stores, PDFs, and local files are not supported.' };
     case 'PAGE_UNAVAILABLE':
-      return { title: 'Allow access to this page', message: 'Click the Kaya Mode toolbar icon on the page you want to read, then select Analyze again. Access must be granted again when you switch websites.' };
+      return { title: 'Allow access to this page', message: 'Open Kaya from the browser toolbar while viewing the page you want help with, then try again.' };
     case 'NO_SELECTION':
-      return { title: 'Select some page text first', message: 'Highlight a paragraph on the website, then choose Explain selected text and select Analyze. Text inside editable fields is excluded.' };
+      return { title: 'Select some page text first', message: 'Highlight the confusing words on the website, then choose “Explain selected words.”' };
     case 'NO_CONTENT':
       return { title: 'No readable page content found', message: 'Try a page with visible text. Embedded pages, images, and PDFs are not supported.' };
+    case 'INVALID_IMAGE':
+      return { title: 'That image could not be opened', message: 'Choose a PNG, JPEG, or WebP screenshot and try again.' };
+    case 'IMAGE_TOO_LARGE':
+      return { title: 'That image is too large', message: 'Choose an image smaller than 10 MB, or take a new screenshot of only the area you need.' };
+    case 'CAPTURE_UNAVAILABLE':
+    case 'CAPTURE_FAILED':
+      return { title: 'Screenshot could not be taken', message: 'Keep the page open, reopen Kaya from the browser toolbar, then try again. You can also upload an image.' };
+    case 'OCR_NO_TEXT':
+      return { title: 'No clear words were found', message: 'Crop closer to the words, or upload a sharper image with larger text.' };
+    case 'OCR_UNAVAILABLE':
+    case 'OCR_FAILED':
+      return { title: 'The image could not be read', message: 'Reload Kaya from your browser’s extensions page, then try the screenshot again.' };
+    case 'OCR_RELOAD_REQUIRED':
+      return { title: 'Reload the Kaya update', message: 'Chrome is still using the older Kaya version. Open the Extensions page, select Reload on Kaya Mode, then take the screenshot again.' };
     case 'AI_UNAVAILABLE':
-      return { title: 'Ollama isn’t available', message: 'Start local Ollama using the setup guide, then select Check local AI and try Analyze again.' };
+      return { title: 'Kaya is not ready yet', message: 'Open “Need help getting started?”, follow the setup guide, then choose “Check if Kaya is ready.”' };
     case 'MODEL_MISSING':
-      return { title: 'Download the local model first', message: 'Run ollama pull qwen2.5:3b as shown in the setup guide, then select Analyze again.' };
+      return { title: 'Finish the one-time setup', message: 'Open the setup guide and download the local model, then try again.' };
     case 'ORIGIN_BLOCKED':
-      return { title: 'Allow Kaya Mode to use Ollama', message: 'Restart Ollama with Kaya Mode’s extension origin allowed. Follow the setup guide, then select Analyze again.' };
+      return { title: 'Allow Kaya to connect', message: 'Follow the connection step in the setup guide, restart the local AI, then try again.' };
     case 'TIMEOUT':
     case 'MODEL_WARMUP':
-      return { title: 'Local AI took too long', message: 'The model may still be loading. Warm it up using the setup guide, close other heavy apps, and select Analyze again.' };
+      return { title: 'Kaya needs more time', message: 'Wait a moment, close other heavy apps if needed, then choose “Try again.”' };
     case 'AI_BUSY':
-      return { title: 'Local AI is busy', message: 'Wait for the other analysis to finish, then select Analyze again.' };
+      return { title: 'Kaya is busy', message: 'Wait for the other guide to finish, then choose “Try again.”' };
     case 'CONNECTION_LOST':
-      return { title: 'Analysis was interrupted', message: 'Select Analyze again. Keep Kaya Mode open until the result is ready.' };
+      return { title: 'The guide was interrupted', message: 'Keep Kaya open, then choose “Try again.”' };
     case 'READER_UNAVAILABLE':
     case 'READER_FAILED':
-      return { title: 'Reload Kaya Mode', message: 'Reload the extension from your browser’s extensions page. Open a website with a form, then select Analyze.' };
+      return { title: 'Reload Kaya Mode', message: 'Reload Kaya from your browser’s extensions page, return to the website, then try again.' };
     case 'CANCELLED':
-      return { title: 'Analysis cancelled', message: 'Select Analyze whenever you’re ready to try again.' };
+      return { title: 'Guide cancelled', message: 'Choose an option whenever you are ready.' };
     default:
-      return { title: 'Something went wrong', message: 'We couldn’t prepare your guidance. Select Analyze to try again.' };
+      return { title: 'Something went wrong', message: 'We couldn’t prepare your guide. Choose “Try again.”' };
   }
 }

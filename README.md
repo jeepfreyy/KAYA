@@ -3,22 +3,24 @@
 Understand a web page. Make sense of a confusing paragraph. Take a form one step at a time.
 
 Kaya Mode is a Chrome/Edge extension with a resizable side panel and real local AI
-using Qwen 2.5 3B through Ollama. It reads only after you select **Analyze**.
+using Qwen 2.5 3B through Ollama. It reads only after you choose the kind of help you want.
 
-## Four ways to use it
+## Five ways to use it
 
 - **Explain this page**: a plain-language overview, important points with original
   source excerpts, and a supported next step.
-- **Explain selected text**: highlight a paragraph on a website and simplify that
+- **Explain selected words**: highlight a paragraph on a website and simplify that
   passage. Expand the original excerpts to compare them with the explanation.
 - **Help me with this form**: the overview, preparation checklist, and first step
   specified in the hackathon program. It reads field metadata, not typed answers.
-- **Simplify this form on the page**: local AI creates a field-by-field guide and
+- **Read a screenshot**: upload a PNG, JPEG, or WebP image—or capture the visible
+  page—then optionally crop it. Packaged local OCR reads the words before Qwen
+  explains them. The image is not saved.
+- **Guide me field by field**: after a form guide is ready, local AI can create a field-by-field guide and
   Kaya highlights each website control in a clearer order. The original controls
   remain in their form with their existing values, validation, and event handlers.
 
-The separately labeled sample mode works without Ollama and never substitutes for
-a failed live analysis. Guided view adds a removable guide and highlight without
+Guided view adds a removable guide and highlight without
 replacing controls. Kaya does not fill or submit forms or guarantee that AI advice is correct.
 
 ## Try it on Windows
@@ -37,14 +39,14 @@ If setup has already completed, use `scripts/start-kaya-ollama.ps1` instead of
 1. Open `chrome://extensions`, enable Developer mode, and **Load unpacked** → `extension/`.
 2. If already installed, select **Reload** on the Kaya Mode extension card.
 3. Open `http://localhost:4173` and click Kaya Mode's toolbar icon.
-4. Select **Check local AI**, then **Explain this page** → **Analyze**.
-5. Try the paragraph beginning “Registration is provisional” with **Explain selected text**.
-6. Choose **Help me with this form** for the checklist and first step, then try
-   **Simplify this form on the page** to navigate the original fields.
+4. Open **Need help getting started?**, select **Check if Kaya is ready**, then choose **Explain this page**.
+5. Try the paragraph beginning “Registration is provisional” with **Explain selected words**.
+6. Choose **Help me with a form** for the checklist and first step, then choose
+   **Guide me field by field** to navigate the original fields.
 
 Drag the panel's left edge to adjust its width. Click Kaya's toolbar icon again
 when changing websites to grant temporary access. Navigation clears old answers.
-Keep the panel open while analysis runs; **Cancel analysis** stops the request.
+Keep the panel open while Kaya prepares a guide; **Cancel** stops the request.
 
 ## Project map
 
@@ -95,7 +97,9 @@ Chrome and local Ollama/Qwen. See the verification guide for manual checks and l
 Analysis stays on your computer. Form mode excludes entered values, passwords,
 checked states, selected values, and uploaded file contents. Page/selection modes
 exclude editable controls, but personal information already printed in page text
-may be included. There is no cloud fallback, analytics, account, or saved analysis history.
+may be included. Screenshot mode intentionally reads visible words in the image the
+user chooses, including any visible personal information. Images and results are not
+saved. There is no cloud fallback, analytics, account, or saved analysis history.
 
 Supported content is visible HTML in the active tab's main frame. PDFs, images,
 embedded frames, shadow roots, custom form widgets, and browser settings pages are

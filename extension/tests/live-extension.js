@@ -59,8 +59,8 @@ try {
   }, demo.url());
   await focusDemo();
   await panel.evaluate(() => document.querySelector('#check-ai').click());
-  await panel.waitForFunction(() => !document.querySelector('#analyze-button').disabled, null, { timeout: 10000 });
-  assert.match(await panel.locator('#status').textContent(), /available locally/);
+  await panel.waitForFunction(() => document.querySelector('#assistant').getAttribute('aria-busy') === 'false', null, { timeout: 10000 });
+  assert.match(await panel.locator('#status').textContent(), /Kaya is ready/);
   // Exercise all four modes against the actual local model, not samples.
   for (const mode of ['page', 'selection']) {
     if (mode === 'selection') await demo.evaluate(() => {
@@ -68,13 +68,11 @@ try {
       range.selectNodeContents(document.querySelector('#selection-example'));
       const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range);
     });
-    await panel.evaluate((mode) => {
-      const select = document.querySelector('#scenario'); select.value = mode;
-      select.dispatchEvent(new Event('change')); document.querySelector('#analyze-button').click();
-    }, mode);
-    await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error').hidden, null, { timeout: 125000 });
-    if (await panel.locator('#error').isVisible()) throw new Error(`${mode}: ${await panel.locator('#error').innerText()}`);
-    assert.equal(await panel.locator('#result-source').textContent(), 'LOCAL AI RESPONSE');
+    if (await panel.locator('#results').isVisible()) await panel.locator('#new-task-button').click();
+    await panel.locator(mode === 'page' ? '#task-page' : '#task-selection').click();
+    await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error-card').hidden, null, { timeout: 125000 });
+    if (await panel.locator('#error-card').isVisible()) throw new Error(`${mode}: ${await panel.locator('#error-card').innerText()}`);
+    assert.equal(await panel.locator('#result-source').textContent(), "Kaya's guide");
     assert.ok(await panel.locator('.source-excerpt').count() > 0);
     assert.ok(await panel.locator('#overview').textContent());
     const body = await worker.evaluate(() => globalThis.__kayaTestBody);
@@ -91,13 +89,32 @@ try {
     await writeFile(new URL(`test-results/${mode}-result.txt`, project), result);
     console.log(`REAL ${mode.toUpperCase()} RESULT:\n${result}`);
   }
-  await panel.evaluate(() => {
-    const select = document.querySelector('#scenario'); select.value = 'live'; select.dispatchEvent(new Event('change'));
-  });
-  await panel.evaluate(() => document.querySelector('#analyze-button').click());
-  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error').hidden, null, { timeout: 125000 });
-  if (await panel.locator('#error').isVisible()) throw new Error(await panel.locator('#error').innerText());
-  assert.equal(await panel.locator('#result-source').textContent(), 'LOCAL AI RESPONSE');
+  // OCR an uploaded crop with the packaged Tesseract worker, then explain its text using local Qwen.
+  const imageBuffer = await demo.locator('#selection-example').screenshot();
+  await panel.locator('#new-task-button').click();
+  await panel.locator('#task-image').click();
+  await panel.locator('#image-upload').setInputFiles({ name: 'selected-words.png', mimeType: 'image/png', buffer: imageBuffer });
+  await panel.locator('#image-preview').waitFor({ state: 'visible' });
+  await panel.locator('#read-image').click();
+  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error-card').hidden, null, { timeout: 125000 });
+  if (await panel.locator('#error-card').isVisible()) throw new Error(`image: ${await panel.locator('#error-card').innerText()}`);
+  assert.match(await panel.locator('#result-meta').textContent(), /OCR \d+%/);
+  assert.match(await panel.locator('#results-footnote').textContent(), /recognized words/);
+  const imageBody = await worker.evaluate(() => globalThis.__kayaTestBody);
+  assert.equal(JSON.parse(JSON.parse(imageBody).messages[1].content).kind, 'image');
+  assert.ok(!imageBody.includes('PRIVATE_') && !imageBody.includes('private-sentinel'));
+  await panel.screenshot({ path: fileURLToPath(new URL('test-results/kaya-image.png', project)), fullPage: true });
+  await panel.locator('#new-task-button').click();
+  await panel.locator('#task-image').click();
+  await focusDemo();
+  await panel.evaluate(() => document.querySelector('#capture-image').click());
+  await panel.locator('#image-preview').waitFor({ state: 'visible' });
+  assert.ok(await panel.locator('#image-canvas').evaluate((canvas) => canvas.width > 0 && canvas.height > 0));
+  await panel.locator('#close-image').click();
+  await panel.locator('#task-form').click();
+  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error-card').hidden, null, { timeout: 125000 });
+  if (await panel.locator('#error-card').isVisible()) throw new Error(await panel.locator('#error-card').innerText());
+  assert.equal(await panel.locator('#result-source').textContent(), "Kaya's guide");
   assert.match(await panel.locator('#result-meta').textContent(), /qwen2\.5:3b/);
   assert.ok(await panel.locator('#overview').textContent());
   assert.ok(await panel.locator('#first-step').textContent());
@@ -111,13 +128,10 @@ try {
   await writeFile(new URL('test-results/live-result.txt', project), result);
   console.log('REAL LOCAL QWEN RESULT:\n' + result);
   await focusDemo();
-  await panel.evaluate(() => {
-    const select = document.querySelector('#scenario'); select.value = 'guided'; select.dispatchEvent(new Event('change'));
-    document.querySelector('#analyze-button').click();
-  });
-  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error').hidden, null, { timeout: 125000 });
-  if (await panel.locator('#error').isVisible()) throw new Error(`guided: ${await panel.locator('#error').innerText()}`);
-  assert.equal(await panel.locator('#result-source').textContent(), 'LOCAL AI RESPONSE');
+  await panel.locator('#guide-form-button').click();
+  await panel.waitForFunction(() => !document.querySelector('#results').hidden || !document.querySelector('#error-card').hidden, null, { timeout: 125000 });
+  if (await panel.locator('#error-card').isVisible()) throw new Error(`guided: ${await panel.locator('#error-card').innerText()}`);
+  assert.equal(await panel.locator('#result-source').textContent(), "Kaya's guide");
   assert.equal(await demo.locator('#__kaya_mode_guided_view_v1__').count(), 1);
   assert.equal(await demo.locator('form #full-name').count(), 1, 'Guided mode must retain the original form field');
   assert.equal(await demo.locator('[data-kaya-mode-guided-active-v1]').count(), 1);
@@ -127,25 +141,20 @@ try {
   await demo.screenshot({ path: fileURLToPath(new URL('test-results/kaya-guided-page.png', project)), fullPage: true });
   await demo.locator('#__kaya_mode_guided_view_v1__').evaluate((element) => element.shadowRoot.querySelector('.exit').click());
   assert.equal(await demo.locator('#__kaya_mode_guided_view_v1__').count(), 0);
-  await panel.evaluate(() => {
-    const select = document.querySelector('#scenario'); select.value = 'live'; select.dispatchEvent(new Event('change'));
-  });
   // Confirm cancellation remains available and stops a second real request.
   await focusDemo();
-  await panel.evaluate(() => document.querySelector('#analyze-button').click());
+  await panel.locator('#new-task-button').click();
+  await panel.locator('#task-form').click();
   await panel.locator('#cancel-button').waitFor({ state: 'visible' });
   await panel.evaluate(() => document.querySelector('#cancel-button').click());
-  await panel.waitForFunction(() => !document.querySelector('#analyze-button').disabled);
+  await panel.waitForFunction(() => document.querySelector('#assistant').getAttribute('aria-busy') === 'false');
   assert.match(await panel.locator('#status').textContent(), /Cancelled/);
   // Change the DOM without navigating away.
   await demo.evaluate(() => { document.querySelector('form').remove(); });
-  await panel.evaluate(() => document.querySelector('#analyze-button').click());
-  await panel.waitForFunction(() => !document.querySelector('#error').hidden);
+  await panel.locator('#task-form').click();
+  await panel.waitForFunction(() => !document.querySelector('#error-card').hidden);
   assert.equal(await panel.locator('#error-title').textContent(), 'No supported form found');
-  await panel.evaluate(() => {
-    const select = document.querySelector('#scenario'); select.value = 'success'; select.dispatchEvent(new Event('change'));
-    document.querySelector('#analyze-button').click();
-  });
+  await panel.locator('#task-page').click();
   await panel.locator('#results').waitFor({ state: 'visible' });
   await demo.goto(`http://127.0.0.1:${server.address().port}/no-form.html`);
   await panel.waitForFunction(() => document.querySelector('#results').hidden);
@@ -154,7 +163,7 @@ try {
   const external = requests.filter((url) => !url.startsWith('http://localhost:11434/')
     && !url.startsWith('http://127.0.0.1:') && !url.startsWith(`chrome-extension://${extensionId}/`));
   assert.deepEqual(external, []);
-  console.log('PASS: unpacked extension, action/worker messaging, real page/selection/form/guided inference, retained original controls, source excerpts, privacy, cancellation, navigation reset, no-form error, and localhost-only traffic.');
+  console.log('PASS: unpacked extension, packaged OCR, screenshot upload/capture, real page/selection/image/form/guided inference, retained original controls, privacy, cancellation, navigation reset, no-form error, and localhost-only traffic.');
 } finally {
   await context?.close();
   await new Promise((resolve) => server.close(resolve));

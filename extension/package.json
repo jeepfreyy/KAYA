@@ -1,14 +1,21 @@
 {
   "name": "kaya-mode-extension",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser-smoke.js",
+    "test:ocr": "node tests/ocr-extension.js",
     "test:reader": "node tests/form-reader-browser.js && node tests/page-reader-browser.js && node tests/guided-view-browser.js",
     "test:live": "node tests/live-extension.js"
   },
-  "devDependencies": { "playwright": "1.62.1" },
-  "engines": { "node": ">=22" }
+  "devDependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "playwright": "1.62.1",
+    "tesseract.js": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

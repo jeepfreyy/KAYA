@@ -9,7 +9,7 @@ a persistent side panel, and a reversible guided view over the website's origina
 
 ## Program coverage
 
-- Interface: Analyze, loading/cancel, errors/retry, labeled samples, readable results.
+- Interface: one-click task choices, loading/cancel, errors/retry, read-aloud, and readable results.
 - Form reader: native visible field labels, types, required flags, placeholders,
   and options, excluding entered values and passwords.
 - Local AI: Qwen 2.5 3B through Ollama, bounded prompts, structured JSON validation,
@@ -25,13 +25,13 @@ metadata or overview/preparationChecklist/firstStep response contract.
 ## How AI is used
 
 1. The user clicks the toolbar icon to grant temporary access to a website.
-2. The side panel reads nothing until the user selects Analyze.
+2. The side panel reads nothing until the user chooses a task.
 3. An isolated reader takes a bounded snapshot of page text, selected text, or
    form metadata. It never changes or submits the website.
 4. The background worker sends that snapshot to local Ollama's chat API.
 5. Qwen generates a new explanation based on the snapshot. The extension checks
    the response shape, length, and referenced source IDs before showing it.
-6. The result displays LOCAL AI RESPONSE, model, elapsed time, and source/field count.
+6. The result shows a plain-language Kaya guide; model, elapsed time, and source/field count stay under Technical details.
 
 Page results include original excerpts for verification. Valid source IDs confirm
 that an excerpt exists, not that every AI claim is accurate. Users should compare

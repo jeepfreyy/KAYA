@@ -6,6 +6,7 @@ See [project scope](../docs/kaya-project.md) and [setup](../docs/kaya-setup.md).
 ## Files
 
 - `panel.html`, `panel.js`, `styles.css`: responsive side panel and all result modes.
+- `image-ocr.js`, `vendor/tesseract/`: local screenshot capture/upload, crop, OCR runtime, and English text data.
 - `form-reader.js`, `form-reader-client.js`: isolated native form metadata extraction.
 - `page-reader.js`, `page-reader-client.js`: visible page/selected-text extraction.
 - `guided-view.js`, `guided-view-client.js`: reversible navigation over the

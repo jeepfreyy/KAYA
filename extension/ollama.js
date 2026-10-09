@@ -137,7 +137,7 @@ export async function checkOllama({ fetchImpl = fetch, signal } = {}) {
 export async function analyzeWithOllama(input, {
   fetchImpl = fetch, signal, timeoutMs = REQUEST_TIMEOUT_MS, onProgress = () => {},
 } = {}) {
-  const isPage = ['page', 'selection'].includes(input?.kind);
+  const isPage = ['page', 'selection', 'image'].includes(input?.kind);
   const isGuided = input?.kind === 'guided';
   const { metadata, truncated } = isPage ? preparePage(input) : prepareMetadata(input);
   const format = isPage ? structuredClone(pageResponseSchema)

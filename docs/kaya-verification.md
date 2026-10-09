@@ -60,26 +60,27 @@ API. CI uses Playwright Chromium for unit/UI/reader checks and does not run a mo
 1. Start local Ollama and `node scripts/serve-kaya-demo.mjs`.
 2. Reload the extension at chrome://extensions, open http://localhost:4173,
    and click Kaya Mode's toolbar icon. Drag the panel edge to choose a useful width.
-3. Select Check local AI, Explain this page, Analyze. Expect LOCAL AI RESPONSE,
-   a model/timing line, an overview, important points, and a next step. Open an
+3. Open Need help getting started and select Check if Kaya is ready. Then choose
+   Explain this page. Expect a simple guide with a first step, meaning, and important points. Open an
    original excerpt to compare it with the AI explanation.
 4. Highlight the “Registration is provisional” paragraph on the website. Choose
-   Explain selected text, Analyze. Only that passage should be explained.
-5. Choose Help me with this form, Analyze. Expect the overview, preparation
+   Explain selected words. Only that passage should be explained.
+5. Choose Help me with a form. Expect the overview, preparation
    checklist, and first step. Check an item as you prepare.
-6. Choose Simplify this form on the page, Analyze. Use Next and Previous in the
+6. Choose Guide me field by field. Use Next and Previous in the
    page guide, confirm the original fields still work, then choose Exit.
-7. Use fictional input values. Repeat analysis; typed answers must not be repeated
+7. Choose Read a screenshot, upload a clean screenshot, crop it, and select Read these
+   words. Repeat with Take page screenshot while a menu is open.
+8. Use fictional input values. Repeat analysis; typed answers must not be repeated
    because the readers exclude control values.
-8. Cancel a request, try the no-form page in form mode, and recover with the practice page.
-9. Select Sample: community workshop registration. Expect SAMPLE AI RESPONSE and
-   the fictional example notice, with no page read or model request.
+9. Cancel a request, try the no-form page in form mode, and recover with the practice page.
+10. Select Read this aloud and confirm the result can be stopped without changing the guide.
 
 ## Remaining manual checks before presenting
 
 - [ ] Check resizing and scrolling in the presenter's normal Chrome/Edge profile.
 - [ ] Switch websites while the panel is open, click the toolbar icon for access,
-      and verify Analyze uses the new page rather than old results.
+      and verify Kaya uses the new page rather than old results.
 - [ ] Close the panel during analysis, reopen it, and retry.
 - [ ] Stop the project Ollama server, check the unavailable message, restart, retry.
 - [ ] Disconnect internet while retaining localhost, then repeat the demo.
@@ -89,7 +90,7 @@ API. CI uses Playwright Chromium for unit/UI/reader checks and does not run a mo
 
 Visible HTML in the main frame only. PDFs, image text, embedded frames, shadow
 roots, and custom widgets are unsupported. Long pages/forms are shortened, and
-navigation resets results. Same-page dynamic changes require another Analyze.
+navigation resets results. Same-page dynamic changes require choosing the task again.
 
 Input values are excluded, but personal details rendered as ordinary page text,
 labels, or placeholders may be included. Page content is untrusted; prompt rules

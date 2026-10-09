@@ -51,12 +51,28 @@ test('guided form requests produce a complete, source-indexed view plan', async 
     return streamed(JSON.stringify(guided));
   } });
   assert.equal(result.kind, 'guided');
-  assert.deepEqual(result.fieldGuidance, guided.fieldGuidance);
+  assert.deepEqual(result.fieldGuidance, [{ ...guided.fieldGuidance[0], plainLabel: 'Name' }]);
   assert.throws(() => validateGuidedView({ ...guided, fieldGuidance: [] }, metadata.fields), { code: 'INVALID_RESPONSE' });
   assert.equal(validateGuidedView({ ...guided, fieldGuidance: [guided.fieldGuidance[0], guided.fieldGuidance[0]] }, metadata.fields).fieldGuidance.length, 1);
   const twoFields = [...metadata.fields, { label: 'Email', type: 'email', placeholder: '', required: false, options: [] }];
   const completed = validateGuidedView(guided, twoFields).fieldGuidance;
-  assert.deepEqual(completed[1], { fieldIndex: 1, plainLabel: 'Email', helpText: 'This field is optional or is not marked required.' });
+  assert.deepEqual(completed[1], { fieldIndex: 1, plainLabel: 'Email', helpText: 'Enter the information requested by “Email”.' });
+
+  const nameFields = [
+    { label: 'First Name', type: 'text', placeholder: '', required: true, options: [] },
+    { label: 'Middle Name', type: 'text', placeholder: '', required: false, options: [] },
+    { label: 'Last Name', type: 'text', placeholder: '', required: true, options: [] },
+    { label: 'Gender', type: 'select', placeholder: '', required: true, options: ['Female', 'Male'] },
+  ];
+  const confused = { ...guidance, fieldGuidance: [
+    { fieldIndex: 3, plainLabel: 'Gender', helpText: 'Select your gender.' },
+    { fieldIndex: 0, plainLabel: 'Name', helpText: 'Enter your full name.' },
+    { fieldIndex: 1, plainLabel: 'Gender', helpText: 'Select your gender.' },
+  ] };
+  const corrected = validateGuidedView(confused, nameFields).fieldGuidance;
+  assert.deepEqual(corrected.map((item) => item.fieldIndex), [0, 1, 2, 3]);
+  assert.deepEqual(corrected.map((item) => item.plainLabel), ['First Name', 'Middle Name', 'Last Name', 'Gender']);
+  assert.equal(corrected[1].helpText, 'Enter the information requested by “Middle Name”.');
 });
 
 test('invalid, incomplete, oversized, or token-limited model output is rejected', async () => {

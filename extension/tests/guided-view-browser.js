@@ -29,10 +29,13 @@ try {
   assert.equal(await page.locator('#registration #name').count(), 1, 'Original control must remain in its form');
   await page.locator('#name').dispatchEvent('input');
   assert.equal(await page.locator('body').getAttribute('data-original-listener'), 'yes', 'Original event listeners must remain attached');
-  assert.equal(await page.locator('[data-kaya-mode-guided-active-v1]').getAttribute('id'), 'email');
+  assert.equal(await page.locator('[data-kaya-mode-guided-active-v1]').getAttribute('id'), 'name');
   const host = page.locator('#__kaya_mode_guided_view_v1__');
   assert.equal(await host.count(), 1);
-  assert.match(await host.evaluate((element) => element.shadowRoot.querySelector('.original').textContent), /Email.*not marked required/);
+  assert.match(await host.evaluate((element) => element.shadowRoot.querySelector('.original').textContent), /Name.*Required/);
+  assert.equal(await host.evaluate((element) => element.shadowRoot.querySelector('h2').textContent), 'Name');
+  await host.evaluate((element) => element.shadowRoot.querySelector('.actions button:nth-child(2)').click());
+  assert.equal(await page.locator('[data-kaya-mode-guided-active-v1]').getAttribute('id'), 'email');
   await host.evaluate((element) => element.shadowRoot.querySelector('.exit').click());
   assert.equal(await page.locator('#__kaya_mode_guided_view_v1__').count(), 0);
   assert.equal(await page.locator('[data-kaya-mode-guided-active-v1]').count(), 0);

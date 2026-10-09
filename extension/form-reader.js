@@ -59,7 +59,24 @@ export function readFormMetadata() {
     if (native) return native;
     const ids = (element.getAttribute('aria-labelledby') || '').trim().split(/\s+/).slice(0, 10);
     const accessible = normalize(ids.map((id) => labelText(document.getElementById(id))).join(' '));
-    return accessible || normalize(element.getAttribute('aria-label'));
+    if (accessible) return accessible;
+    const aria = normalize(element.getAttribute('aria-label'));
+    if (aria) return aria;
+
+    // Angular Material and similar libraries often render a floating label in
+    // the field container without connecting it through for/aria-labelledby.
+    const previous = element.previousElementSibling;
+    if (previous?.matches('label, mat-label')) {
+      const nearby = labelText(previous);
+      if (nearby) return nearby;
+    }
+    let container = element.closest('md-input-container, mat-form-field, .mat-form-field');
+    if (!container) {
+      const candidate = element.closest('.form-field, .form-group');
+      if (candidate?.querySelectorAll('input, textarea, select').length === 1) container = candidate;
+    }
+    if (!container || container.querySelectorAll('input, textarea, select').length !== 1) return '';
+    return normalize(Array.from(container.querySelectorAll('label, mat-label')).slice(0, 10).map(labelText).join(' '));
   }
 
   const fields = [];

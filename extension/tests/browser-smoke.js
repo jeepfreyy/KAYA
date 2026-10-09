@@ -8,6 +8,8 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 const root = new URL('../', import.meta.url);
 const files = new Map([
   ['/panel.html', 'text/html'], ['/styles.css', 'text/css'],
+  ['/assets/kaya-logo.png', 'image/png'],
+  ['/theme.js', 'text/javascript'],
   ['/panel.js', 'text/javascript'], ['/analysis-service.js', 'text/javascript'],
   ['/page-reader.js', 'text/javascript'], ['/page-reader-client.js', 'text/javascript'], ['/page-analysis.js', 'text/javascript'],
   ['/form-reader-client.js', 'text/javascript'], ['/form-reader.js', 'text/javascript'],
@@ -102,6 +104,15 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
 
   assert.ok(await page.getByRole('heading', { name: 'What do you need help with?' }).isVisible());
+  const initialTheme = await page.locator('html').getAttribute('data-theme');
+  assert.ok(['light', 'dark'].includes(initialTheme));
+  await page.locator('#theme-toggle').click();
+  const selectedTheme = initialTheme === 'dark' ? 'light' : 'dark';
+  assert.equal(await page.locator('html').getAttribute('data-theme'), selectedTheme);
+  assert.equal(await page.evaluate(() => localStorage.getItem('kaya-theme')), selectedTheme);
+  await page.reload();
+  assert.equal(await page.locator('html').getAttribute('data-theme'), selectedTheme);
+  assert.equal(await page.locator('#theme-toggle').getAttribute('aria-pressed'), String(selectedTheme === 'dark'));
   assert.equal(await page.locator('.task-button').count(), 4);
   assert.ok(await page.getByText('You are in control.').isVisible());
   assert.ok(await page.locator('#results').isHidden());
@@ -122,9 +133,15 @@ try {
   }
   assert.ok(await page.locator('.source-excerpt').count() > 0);
   assert.ok(await page.locator('#task-picker').isHidden());
+  for (const selector of ['#main-intro', '#privacy-note', '#status', '#help-panel']) {
+    assert.ok(await page.locator(selector).isHidden(), `${selector} is hidden in the focused results view`);
+  }
 
   await page.locator('#new-task-button').click();
   assert.ok(await page.locator('#task-picker').isVisible());
+  for (const selector of ['#main-intro', '#privacy-note', '#status', '#help-panel']) {
+    assert.ok(await page.locator(selector).isVisible(), `${selector} is restored on the main screen`);
+  }
   assert.equal(await page.locator(':focus').getAttribute('id'), 'task-title');
   await page.locator('#task-form').click();
   await page.locator('#results').waitFor({ state: 'visible' });
@@ -133,6 +150,8 @@ try {
   await page.getByRole('checkbox').check();
   await page.locator('#guide-form-button').click();
   await page.locator('#results').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#mode-badge').textContent(), 'On the page');
+  assert.equal(await page.locator('#mode-badge').evaluate((element) => getComputedStyle(element).whiteSpace), 'nowrap');
   assert.match(await page.locator('#status').textContent(), /now beside the original form fields/);
 
   await page.locator('#new-task-button').click();

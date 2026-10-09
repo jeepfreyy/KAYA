@@ -52,27 +52,43 @@ export function validateGuidance(value) {
 export function validateGuidedView(value, fields) {
   const guidance = validateGuidance(value);
   const text = (item, max) => typeof item === 'string' && item.trim().length > 0 && item.length <= max;
-  const seen = new Set();
   if (!Array.isArray(value.fieldGuidance) || !value.fieldGuidance.length || value.fieldGuidance.length > 50) {
     throw new LocalAIError('INVALID_RESPONSE');
   }
-  const fieldGuidance = [];
+  const byFieldIndex = new Map();
   for (const item of value.fieldGuidance) {
     if (!item || !Number.isInteger(item.fieldIndex) || item.fieldIndex < 0
       || item.fieldIndex >= fields.length || !text(item.plainLabel, 200) || !text(item.helpText, 400)) {
       throw new LocalAIError('INVALID_RESPONSE');
     }
-    if (seen.has(item.fieldIndex)) continue;
-    seen.add(item.fieldIndex);
-    fieldGuidance.push({ fieldIndex: item.fieldIndex, plainLabel: item.plainLabel.trim(), helpText: item.helpText.trim() });
+    if (!byFieldIndex.has(item.fieldIndex)) byFieldIndex.set(item.fieldIndex, {
+      fieldIndex: item.fieldIndex, plainLabel: item.plainLabel.trim(), helpText: item.helpText.trim(),
+    });
   }
-  // Small local models can omit or repeat an index even under a JSON schema.
-  // Complete the sequence from trusted metadata rather than rejecting useful guidance.
-  fields.forEach((field, fieldIndex) => {
-    if (seen.has(fieldIndex)) return;
-    const plainLabel = field?.label?.trim() || field?.placeholder?.trim() || field?.type?.trim() || `Field ${fieldIndex + 1}`;
-    fieldGuidance.push({ fieldIndex, plainLabel,
-      helpText: field?.required ? 'This field is marked required.' : 'This field is optional or is not marked required.' });
+
+  const normalizeLabel = (label) => (label || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  const guidanceMatchesField = (generated, detected) => {
+    const generatedWords = new Set(normalizeLabel(generated).split(' ').filter(Boolean));
+    const detectedWords = normalizeLabel(detected).split(' ').filter((word) => word.length > 2 && !['the', 'your', 'field'].includes(word));
+    return detectedWords.length > 0 && detectedWords.every((word) => generatedWords.has(word));
+  };
+  const fallbackHelp = (field, label) => {
+    const name = label || `field ${field.fieldIndex + 1}`;
+    if (field?.type === 'select' || field?.type === 'radio') return `Choose the option requested for “${name}”.`;
+    if (field?.type === 'checkbox') return `Review “${name}” and select it only if it applies.`;
+    if (field?.type === 'file') return `Choose the file requested by “${name}”.`;
+    return `Enter the information requested by “${name}”.`;
+  };
+
+  // Field indexes are DOM positions. Always visit them in page order, even if
+  // a small model returns an incomplete, repeated, or reordered sequence.
+  const fieldGuidance = fields.map((field, fieldIndex) => {
+    const generated = byFieldIndex.get(fieldIndex);
+    const detectedLabel = field?.label?.trim() || field?.placeholder?.trim();
+    const plainLabel = detectedLabel || generated?.plainLabel || field?.type?.trim() || `Field ${fieldIndex + 1}`;
+    const helpText = generated && (!detectedLabel || guidanceMatchesField(generated.plainLabel, detectedLabel))
+      ? generated.helpText : fallbackHelp({ ...field, fieldIndex }, plainLabel);
+    return { fieldIndex, plainLabel, helpText };
   });
   return { ...guidance, fieldGuidance };
 }
@@ -109,7 +125,7 @@ Use plain English. Overview: one or two short sentences. Checklist: 1 to 6 conci
 Missing or ambiguous labels mean uncertainty: explicitly acknowledge it instead of guessing. File fields without a document label do not establish which document is required. If no preparation is specified, say so. This may be only part of a form. Never claim to have submitted or filled anything. No markdown or extra keys.`;
 
 const GUIDED_PROMPT = `${SYSTEM_PROMPT}
-Also return fieldGuidance for the clearest useful order in which to visit the provided fields. Include every field exactly once. fieldIndex is the field's zero-based position in the fields array. plainLabel simplifies only the supplied label, type, placeholder, and options; helpText briefly explains what the visible metadata asks for. Never infer a person's answer or change whether a field is required. The extension will show this guidance beside the website's original input; do not claim the input was replaced, filled, or submitted.`;
+Also return fieldGuidance in the same order as the provided fields. Include every field exactly once. fieldIndex is the field's zero-based position in the fields array. Keep each field distinct: for example, First Name, Middle Name, and Last Name are separate fields. plainLabel simplifies only that indexed field's supplied label, type, placeholder, and options; helpText briefly explains what that same field asks for. Never infer a person's answer or change whether a field is required. The extension will show this guidance beside the website's original input; do not claim the input was replaced, filled, or submitted.`;
 
 function httpError(status) {
   if (status === 404) return new LocalAIError('MODEL_MISSING');

@@ -4,25 +4,32 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kaya Mode</title>
+    <script src="theme.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="shell" id="assistant" aria-busy="false">
       <header class="topbar">
         <div class="brand" aria-label="Kaya Mode">
-          <span class="brand-mark" aria-hidden="true">K</span>
+          <img class="brand-mark" src="assets/kaya-logo.png" alt="" aria-hidden="true" />
           <span>Kaya Mode</span>
         </div>
-        <span class="privacy-badge"><span aria-hidden="true">●</span> Private</span>
+        <div class="topbar-actions">
+          <span class="privacy-badge"><span aria-hidden="true">●</span> Private</span>
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Switch to dark theme">
+            <span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
+            <span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
+          </button>
+        </div>
       </header>
 
-      <section class="intro" aria-labelledby="page-title">
+      <section class="intro" id="main-intro" aria-labelledby="page-title">
         <p class="eyebrow">One step at a time</p>
         <h1 id="page-title">What do you need help with?</h1>
         <p>Choose one option. Kaya will give you a short, clear guide.</p>
       </section>
 
-      <aside class="privacy-note" aria-label="Privacy information">
+      <aside class="privacy-note" id="privacy-note" aria-label="Privacy information">
         <span class="privacy-icon" aria-hidden="true">✓</span>
         <div>
           <strong>You are in control.</strong>

@@ -4,7 +4,7 @@ import { hideGuidedView, showGuidedView } from './guided-view-client.js';
 import { buildImageBlocks, captureVisiblePage, recognizeImage, validateImageFile } from './image-ocr.js';
 
 const ids = [
-  'assistant', 'task-picker', 'loading-row', 'loading-label', 'status', 'error-card',
+  'assistant', 'main-intro', 'privacy-note', 'task-picker', 'loading-row', 'loading-label', 'status', 'help-panel', 'error-card',
   'error-title', 'error-message', 'retry-button', 'results', 'results-title',
   'overview', 'overview-title', 'checklist', 'checklist-title', 'first-step',
   'first-step-title', 'mode-badge', 'result-source', 'result-meta', 'results-footnote',
@@ -25,6 +25,14 @@ let currentUtterance;
 let sourceCanvas;
 let cropRectangle;
 let selectionStart;
+
+function showResultsView(showResults) {
+  for (const id of ['main-intro', 'privacy-note', 'status', 'help-panel']) {
+    elements[id].hidden = showResults;
+  }
+  elements.assistant.dataset.view = showResults ? 'results' : 'main';
+  if (showResults) elements['help-panel'].open = false;
+}
 
 function stopReading() {
   if ('speechSynthesis' in globalThis) globalThis.speechSynthesis.cancel();
@@ -208,6 +216,7 @@ function renderResults(result) {
   }
 
   elements['guide-form-button'].hidden = result.kind !== 'form';
+  showResultsView(true);
   elements['task-picker'].hidden = true;
   elements.results.hidden = false;
 }
@@ -217,6 +226,7 @@ function showError(error) {
   elements['error-title'].textContent = title;
   elements['error-message'].textContent = message;
   elements['error-card'].hidden = false;
+  showResultsView(false);
   elements['task-picker'].hidden = false;
   elements.status.textContent = error.code === 'CANCELLED'
     ? 'Cancelled. You can choose an option whenever you are ready.'
@@ -302,6 +312,7 @@ function reset(message = 'Choose an option above to begin.') {
   setLoading(false);
   elements.results.hidden = true;
   elements['error-card'].hidden = true;
+  showResultsView(false);
   elements['task-picker'].hidden = false;
   closeImageWorkflow();
   elements.status.textContent = message;

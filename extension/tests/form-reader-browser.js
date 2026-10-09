@@ -77,6 +77,11 @@ try {
   assert.deepEqual((await page.evaluate(readFormMetadata)).fields[0], {
     label: 'Lots of space', type: 'text', required: false, placeholder: 'Add text', options: [],
   });
+  await page.setContent(`<md-input-container><label>First Name</label><input></md-input-container>
+    <mat-form-field><mat-label>Middle Name</mat-label><input></mat-form-field>
+    <div class="form-group"><label>Last Name</label><input></div>`);
+  assert.deepEqual((await page.evaluate(readFormMetadata)).fields.map((field) => field.label),
+    ['First Name', 'Middle Name', 'Last Name']);
   await page.setContent('<div id="host"></div><iframe srcdoc="<input aria-label=Inside-frame>"></iframe>');
   await page.evaluate(() => document.querySelector('#host').attachShadow({ mode: 'open' }).innerHTML = '<input aria-label="Shadow field">');
   assert.deepEqual(await page.evaluate(readFormMetadata), { fields: [] });

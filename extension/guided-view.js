@@ -39,7 +39,8 @@ export function applyGuidedView(plan) {
     if (visible(element)) fields.push(element);
   }
   const steps = plan.fieldGuidance.filter((item) => Number.isInteger(item.fieldIndex)
-    && item.fieldIndex >= 0 && item.fieldIndex < fields.length);
+    && item.fieldIndex >= 0 && item.fieldIndex < fields.length)
+    .sort((first, second) => first.fieldIndex - second.fieldIndex);
   if (!steps.length) return { appliedCount: 0 };
 
   const pageStyle = document.createElement('style');
@@ -97,11 +98,11 @@ export function applyGuidedView(plan) {
     current = Math.max(0, Math.min(index, steps.length - 1));
     const step = steps[current];
     const field = fields[step.fieldIndex];
+    const metadata = plan.fieldMetadata?.[step.fieldIndex];
     field.setAttribute(ACTIVE, '');
     count.textContent = `Field ${current + 1} of ${steps.length}`;
-    heading.textContent = step.plainLabel;
+    heading.textContent = metadata?.label || metadata?.placeholder || step.plainLabel;
     help.textContent = step.helpText;
-    const metadata = plan.fieldMetadata?.[step.fieldIndex];
     const originalLabel = metadata?.label || metadata?.placeholder || metadata?.type || 'Unlabeled field';
     original.textContent = `Original field: ${originalLabel} · ${metadata?.required ? 'Required' : 'Optional or not marked required'}`;
     previous.disabled = current === 0;
